@@ -1,0 +1,76 @@
+{
+  "bindings": [
+    {
+      "message_id": "1418279414076018789",
+      "brand": "yolo",
+      "form": "https://docs.google.com/forms/d/e/1FAIpQLSfch3BMXkr6j-iTgVU10r-MYAdGV7WjGmNoJC4n5sgr_wFxlg/viewform?usp=header",
+      "guild_id": "1308543612019281940",
+      "channel_id": "1308543612019281943",
+      "emoji": "ANY"
+    },
+    {
+      "message_id": "1418284050396741663",
+      "brand": "Ctypto Wallet",
+      "form": "https://docs.google.com/forms/d/14Ua7x2AW3uani6a0fucCrRxQZclQkIiHvR82aoIbovc/edit",
+      "guild_id": "1308543612019281940",
+      "channel_id": "1308543612019281943",
+      "emoji": "ANY"
+    },
+    {
+      "message_id": "1418284927673303082",
+      "brand": "Crypto Wallet X",
+      "form": "https://growi.io/o/the-hustler-s-club-e0cc2a00/c/13302?method=username",
+      "guild_id": "1308543612019281940",
+      "channel_id": "1390105651686146189",
+      "emoji": "ANY"
+    },
+    {
+      "message_id": "1418288751884505272",
+      "brand": "Crypto Wallet",
+      "form": "https://growi.io/o/the-hustler-s-club-e0cc2a00/c/13302?method=username",
+      "guild_id": "1308543612019281940",
+      "channel_id": "1308543612019281943",
+      "emoji": "\u2705"
+    },
+    {
+      "message_id": "1418288986031525950",
+      "brand": "diff brand",
+      "form": "https://growi.io/o/the-hustler-s-club-e0cc2a00/c/13302?method=username",
+      "guild_id": "1308543612019281940",
+      "channel_id": "1308543612019281943",
+      "emoji": "\u2705"
+    },
+    {
+      "message_id": "1418664109238517944",
+      "brand": "Collagen brand",
+      "form": "https://www.growi.io/o/wholesome-wellness-bb5a7c36/c/16791?method=oauth",
+      "guild_id": "1418296088397484074",
+      "channel_id": "1418305580459757598",
+      "emoji": "\u2705"
+    },
+    {
+      "message_id": "1418666100966821981",
+      "brand": "collagen brand",
+      "form": "https://www.growi.io/o/wholesome-wellness-bb5a7c36/c/16791?method=oauth",
+      "guild_id": "1418296088397484074",
+      "channel_id": "1418305580459757598",
+      "emoji": "\u2705"
+    },
+    {
+      "message_id": "1418748277565947964",
+      "brand": "yourmom",
+      "form": "https://www.growi.io/o/wholesome-wellness-bb5a7c36/c/16791?method=oauth",
+      "guild_id": "1418296088397484074",
+      "channel_id": null,
+      "emoji": "\u2705"
+    },
+    {
+      "message_id": "1418882405615407155",
+      "brand": "Crypto",
+      "form": "https://www.growi.io/o/wholesome-wellness-bb5a7c36/c/16791?method=oauth",
+      "guild_id": "1282010167507943444",
+      "channel_id": null,
+      "emoji": "ANY"
+    }
+  ]
+}
