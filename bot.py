@@ -126,7 +126,8 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
         # Fetch user and DM
         user = bot.get_user(payload.user_id) or await bot.fetch_user(payload.user_id)
         try:
-            await user.send(f"Here is your **{binding['brand']}** onboarding form:\n{binding['form']}")
+            # here is what the user will receive
+            await user.send(f"Here is your **{binding['brand']}** onboarding nigga form:\n{binding['form']}")
             _SENT_CACHE[key] = now
         except Exception:
             # Fallback: notify in channel (public)
