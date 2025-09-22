@@ -47,9 +47,45 @@ class SonOfAndOn(commands.Bot):
 bot = SonOfAndOn()
 
 
+DM_REPLY_TEMPLATE = (
+    "Hey! 👋 Thanks for your message.\n"
+    "I'm the THC Bot. A human will review this soon.\n"
+    "If you need help fast, try `/list_binds` or `/newbrand`."
+)
+
+
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user} (ID: {bot.user.id})")
+
+# new code
+
+
+@bot.event
+async def on_message(message: discord.Message):
+    # ignore bots (including ourselves)
+    if message.author.bot:
+        return
+
+    # 1) Reply to **DMs to the bot**
+    if isinstance(message.channel, discord.DMChannel):
+        await message.reply(DM_REPLY_TEMPLATE)
+        return  # no need to process commands in DMs unless you want to
+
+    # 2) (Optional) Reply in servers only when user talks **to** the bot
+    #   - either mentions the bot, or starts with "A" (your example)
+    mentioned_me = bot.user in message.mentions if bot.user else False
+    starts_with_A = message.content.strip().lower().startswith("a")
+
+    if mentioned_me or starts_with_A:
+        try:
+            await message.reply(DM_REPLY_TEMPLATE, mention_author=True)
+        except discord.Forbidden:
+            # no send perms in this channel; silently skip
+            pass
+
+    # keep commands working (important!)
+    await bot.process_commands(message)
 
 
 @bot.event
@@ -127,7 +163,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
         user = bot.get_user(payload.user_id) or await bot.fetch_user(payload.user_id)
         try:
             # here is what the user will receive
-            await user.send(f"Here is your **{binding['brand']}** onboarding nigga form:\n{binding['form']}")
+            await user.send(f"Here is your **{binding['brand']}** onboarding form:\n{binding['form']}")
             _SENT_CACHE[key] = now
         except Exception:
             # Fallback: notify in channel (public)
