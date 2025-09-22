@@ -11,6 +11,12 @@ from store import find_binding
 COOLDOWN_SECONDS = 24 * 60 * 60  # 24h; change as you like
 _SENT_CACHE: dict[tuple[int, int], float] = {}
 
+# --- Ticket config for growi---
+# <-- replace with your Growi person's Discord user ID
+GROWI_USER_ID = 563044854792323082
+# auto-creates this category; set "" to disable
+TICKETS_CATEGORY_NAME = "Growi Ticket"
+
 
 # on_raw_reaction_add gives us payload even if message isn't cached
 load_dotenv()
@@ -23,6 +29,7 @@ intents = discord.Intents.default()
 intents.guilds = True
 intents.guild_reactions = True
 intents.dm_messages = True  # not strictly required to send DMs, but fine to keep
+intents.members = True
 
 
 class SonOfAndOn(commands.Bot):
@@ -50,7 +57,6 @@ bot = SonOfAndOn()
 DM_REPLY_TEMPLATE = (
     "Hey! 👋 Thanks for your message.\n"
     "I'm the THC Bot. A human will review this soon.\n"
-    "If you need help fast, try `/list_binds` or `/newbrand`."
 )
 
 
@@ -59,6 +65,119 @@ async def on_ready():
     print(f"✅ Logged in as {bot.user} (ID: {bot.user.id})")
 
 # new code
+# ---------- Tickets: helpers ----------
+
+
+async def _get_or_create_tickets_category(guild: discord.Guild) -> discord.CategoryChannel | None:
+    name = TICKETS_CATEGORY_NAME.strip()
+    if not name:
+        return None
+    cat = discord.utils.get(guild.categories, name=name)
+    if cat:
+        return cat
+    return await guild.create_category(name, reason="Create tickets category")
+
+
+class CloseTicketView(discord.ui.View):
+    def __init__(self, opener_id: int, growi_id: int):
+        super().__init__(timeout=None)  # persists until bot restarts
+        self.opener_id = opener_id
+        self.growi_id = growi_id
+
+    @discord.ui.button(label="🔴 Close Ticket", style=discord.ButtonStyle.danger)
+    async def close_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
+        user = interaction.user
+        if (
+            user.id == self.opener_id
+            or user.id == self.growi_id
+            or (isinstance(user, discord.Member) and user.guild_permissions.manage_channels)
+        ):
+            await interaction.response.send_message("✅ Closing ticket…", ephemeral=True)
+            try:
+                await interaction.channel.delete(reason=f"Ticket closed by {user}")
+            except discord.Forbidden:
+                await interaction.followup.send("❌ I lack permission to delete this channel.", ephemeral=True)
+            return
+        await interaction.response.send_message("⛔ You’re not allowed to close this ticket.", ephemeral=True)
+
+
+async def create_ticket(guild: discord.Guild, opener: discord.Member, growi_user_id: int) -> discord.TextChannel:
+    """Create a private ticket channel for opener + growi user + bot. Prevents duplicates."""
+    growi_member: discord.Member | None = guild.get_member(growi_user_id)
+    bot_member: discord.Member | None = guild.me
+
+    if growi_member is None:
+        raise RuntimeError("Configured Growi user not found in this server.")
+
+    # Prevent duplicates by tagging topic
+    ticket_tag = f"TICKET:{opener.id}"
+    for ch in guild.text_channels:
+        if ch.topic and ticket_tag in ch.topic:
+            return ch  # return existing channel
+
+    # Build overwrites
+    overwrites = {
+        guild.default_role: discord.PermissionOverwrite(view_channel=False),
+        opener: discord.PermissionOverwrite(
+            view_channel=True, send_messages=True, read_message_history=True, attach_files=True, embed_links=True
+        ),
+        growi_member: discord.PermissionOverwrite(
+            view_channel=True, send_messages=True, read_message_history=True, attach_files=True, embed_links=True
+        ),
+    }
+    if bot_member:
+        overwrites[bot_member] = discord.PermissionOverwrite(
+            view_channel=True, send_messages=True, read_message_history=True,
+            attach_files=True, embed_links=True, manage_messages=True
+        )
+
+    category = await _get_or_create_tickets_category(guild)
+    channel_name = f"ticket-{opener.name}".lower().replace(" ", "-")[:90]
+
+    ticket_channel = await guild.create_text_channel(
+        name=channel_name,
+        topic=f"{ticket_tag} | Opened by {opener} ({opener.id})",
+        overwrites=overwrites,
+        category=category,
+        reason=f"Ticket opened by {opener}",
+    )
+
+    # Drop close button
+    view = CloseTicketView(opener_id=opener.id, growi_id=growi_user_id)
+    await ticket_channel.send(
+        f"Hello {opener.mention}! This is your private support channel.\n"
+        f"{growi_member.mention} and <@{bot_member.id}> are here.\n"
+        f"Click **Close Ticket** when you’re done.",
+        view=view,
+    )
+    return ticket_channel
+
+
+class HelpMenu(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=60)  # menu expires after 60s
+
+    @discord.ui.button(label="1️⃣ Growi Help", style=discord.ButtonStyle.primary)
+    async def button_help(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            ch = await create_ticket(interaction.guild, interaction.user, GROWI_USER_ID)
+            await interaction.response.send_message(f"✅ Ticket ready: {ch.mention}", ephemeral=True)
+        except RuntimeError as e:
+            await interaction.response.send_message(f"⚠️ {e}", ephemeral=True)
+        except Exception:
+            await interaction.response.send_message("❌ Couldn’t create the ticket.", ephemeral=True)
+
+    @discord.ui.button(label="2️⃣ Apply To brand", style=discord.ButtonStyle.success)
+    async def button_guidance(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("You chose **Guidance** 🧭", ephemeral=True)
+
+    @discord.ui.button(label="3️⃣ some other issue", style=discord.ButtonStyle.secondary)
+    async def button_droid(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("You chose **Droid Help** 🤖", ephemeral=True)
+
+    @discord.ui.button(label="4️⃣ Something Else", style=discord.ButtonStyle.danger)
+    async def button_other(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("You chose **Other** ⚡", ephemeral=True)
 
 
 @bot.event
@@ -70,21 +189,23 @@ async def on_message(message: discord.Message):
     # 1) Reply to **DMs to the bot**
     if isinstance(message.channel, discord.DMChannel):
         await message.reply(DM_REPLY_TEMPLATE)
-        return  # no need to process commands in DMs unless you want to
+        return
 
-    # 2) (Optional) Reply in servers only when user talks **to** the bot
-    #   - either mentions the bot, or starts with "A" (your example)
-    mentioned_me = bot.user in message.mentions if bot.user else False
+    # 2) If bot is mentioned → show interactive menu
+    if bot.user and bot.user in message.mentions:
+        view = HelpMenu()
+        await message.channel.send("Hi! 👋 Please choose an option below:", view=view)
+        return  # stop here so it doesn’t also send DM_REPLY_TEMPLATE
+
+    # 3) (Optional) Reply in servers if message starts with "A"
     starts_with_A = message.content.strip().lower().startswith("a")
-
-    if mentioned_me or starts_with_A:
+    if starts_with_A:
         try:
             await message.reply(DM_REPLY_TEMPLATE, mention_author=True)
         except discord.Forbidden:
-            # no send perms in this channel; silently skip
             pass
 
-    # keep commands working (important!)
+    # keep commands working
     await bot.process_commands(message)
 
 
