@@ -13,7 +13,7 @@ _SENT_CACHE: dict[tuple[int, int], float] = {}
 
 # --- Ticket config for growi---
 # <-- replace with your Growi person's Discord user ID
-GROWI_USER_ID = 563044854792323082
+GROWI_USER_ID = 1363412581137780911
 # auto-creates this category; set "" to disable
 TICKETS_CATEGORY_NAME = "Growi Ticket"
 
@@ -40,6 +40,10 @@ class SonOfAndOn(commands.Bot):
         # load cog
         await self.load_extension("cogs.admin")
         # fast sync to a single guild if provided
+
+        # IMPORTANT: register persistent views once on boot
+        self.add_view(CloseTicketView())
+
         if GUILD_ID:
             guild = discord.Object(id=int(GUILD_ID))
             self.tree.copy_global_to(guild=guild)
@@ -55,8 +59,15 @@ bot = SonOfAndOn()
 
 
 DM_REPLY_TEMPLATE = (
-    "Hey! 👋 Thanks for your message.\n"
-    "I'm the THC Bot. A human will review this soon.\n"
+    "# 🎉 Welcome to the THC Server 🎉\n"
+
+    "Here at THC, we:\n"
+    "- Work with TikTok Shop creators.\n"
+    "- Provide opportunities and retainers.\n"
+    "- Support your growth as a creator.\n"
+
+    "💬 If you have any questions, please reach out to <@563044854792323082>.\n"
+
 )
 
 
@@ -78,27 +89,63 @@ async def _get_or_create_tickets_category(guild: discord.Guild) -> discord.Categ
     return await guild.create_category(name, reason="Create tickets category")
 
 
-class CloseTicketView(discord.ui.View):
-    def __init__(self, opener_id: int, growi_id: int):
-        super().__init__(timeout=None)  # persists until bot restarts
-        self.opener_id = opener_id
-        self.growi_id = growi_id
+# class CloseTicketView(discord.ui.View):
+#     def __init__(self, opener_id: int, growi_id: int):
+#         super().__init__(timeout=None)  # persists until bot restarts
+#         self.opener_id = opener_id
+#         self.growi_id = growi_id
 
-    @discord.ui.button(label="🔴 Close Ticket", style=discord.ButtonStyle.danger)
+#     @discord.ui.button(label="🔴 Close Ticket", style=discord.ButtonStyle.danger)
+#     async def close_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
+#         user = interaction.user
+#         if (
+#             user.id == self.opener_id
+#             or user.id == self.growi_id
+#             or (isinstance(user, discord.Member) and user.guild_permissions.manage_channels)
+#         ):
+#             await interaction.response.send_message("✅ Closing ticket…", ephemeral=True)
+#             try:
+#                 await interaction.channel.delete(reason=f"Ticket closed by {user}")
+#             except discord.Forbidden:
+#                 await interaction.followup.send("❌ I lack permission to delete this channel.", ephemeral=True)
+#             return
+#         await interaction.response.send_message("⛔ You’re not allowed to close this ticket.", ephemeral=True)
+
+class CloseTicketView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)  # persistent
+
+    @discord.ui.button(
+        label="🔴 Close Ticket",
+        style=discord.ButtonStyle.danger,
+        custom_id="thc:close_ticket"  # <-- stable id
+    )
     async def close_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
-        user = interaction.user
-        if (
-            user.id == self.opener_id
-            or user.id == self.growi_id
-            or (isinstance(user, discord.Member) and user.guild_permissions.manage_channels)
-        ):
-            await interaction.response.send_message("✅ Closing ticket…", ephemeral=True)
+        # recover opener from channel topic so we don't need in-memory state
+        opener_id = None
+        topic = getattr(interaction.channel, "topic", "") or ""
+        if "TICKET:" in topic:
             try:
-                await interaction.channel.delete(reason=f"Ticket closed by {user}")
-            except discord.Forbidden:
-                await interaction.followup.send("❌ I lack permission to delete this channel.", ephemeral=True)
-            return
-        await interaction.response.send_message("⛔ You’re not allowed to close this ticket.", ephemeral=True)
+                opener_id = int(topic.split("TICKET:")[
+                                1].split()[0].strip("| "))
+            except Exception:
+                pass
+
+        user = interaction.user
+        allowed = (
+            (opener_id and user.id == opener_id) or
+            user.id == GROWI_USER_ID or
+            (isinstance(user, discord.Member)
+             and user.guild_permissions.manage_channels)
+        )
+        if not allowed:
+            return await interaction.response.send_message("⛔ You’re not allowed to close this ticket.", ephemeral=True)
+
+        await interaction.response.send_message("✅ Closing ticket…", ephemeral=True)
+        try:
+            await interaction.channel.delete(reason=f"Ticket closed by {user}")
+        except discord.Forbidden:
+            await interaction.followup.send("❌ I lack permission to delete this channel (need **Manage Channels**).", ephemeral=True)
 
 
 async def create_ticket(guild: discord.Guild, opener: discord.Member, growi_user_id: int) -> discord.TextChannel:
@@ -143,7 +190,7 @@ async def create_ticket(guild: discord.Guild, opener: discord.Member, growi_user
     )
 
     # Drop close button
-    view = CloseTicketView(opener_id=opener.id, growi_id=growi_user_id)
+    view = CloseTicketView()
     await ticket_channel.send(
         f"Hello {opener.mention}! This is your private support channel.\n"
         f"{growi_member.mention} and <@{bot_member.id}> are here.\n"
