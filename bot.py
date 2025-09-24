@@ -346,18 +346,18 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
                 pass
 
         # Optional: remove user's reaction to keep message tidy (needs Manage Messages)
-        try:
-            channel = bot.get_channel(payload.channel_id) or await bot.fetch_channel(payload.channel_id)
-            message = await channel.fetch_message(payload.message_id)
-            if payload.guild_id:
-                guild = bot.get_guild(payload.guild_id) or await bot.fetch_guild(payload.guild_id)
-                member = guild.get_member(payload.user_id) or await guild.fetch_member(payload.user_id)
-            else:
-                member = None
-            if member:
-                await message.remove_reaction(payload.emoji, member)
-        except Exception:
-            pass
+        # try:
+        #     channel = bot.get_channel(payload.channel_id) or await bot.fetch_channel(payload.channel_id)
+        #     message = await channel.fetch_message(payload.message_id)
+        #     if payload.guild_id:
+        #         guild = bot.get_guild(payload.guild_id) or await bot.fetch_guild(payload.guild_id)
+        #         member = guild.get_member(payload.user_id) or await guild.fetch_member(payload.user_id)
+        #     else:
+        #         member = None
+        #     if member:
+        #         await message.remove_reaction(payload.emoji, member)
+        # except Exception:
+        #     pass
 
     except Exception as e:
         print("Reaction handler error:", e)
