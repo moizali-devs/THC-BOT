@@ -17,10 +17,21 @@ GROWI_USER_ID = 1363412581137780911
 # auto-creates this category; set "" to disable
 TICKETS_CATEGORY_NAME = "Growi Ticket"
 
-
 # on_raw_reaction_add gives us payload even if message isn't cached
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
+
+
+# --- Welcome config ---
+WELCOME_CHANNEL_ID = int(os.getenv("WELCOME_CHANNEL_ID", "0"))  # set in .env
+WELCOME_MESSAGE = (
+    "# Welcome {mention} to **THC**!\n\n"
+    "Here we will guide you on how to make your first 10k/m online \n\n"
+    "Follow the steps below to achieve financial freedom ( Free Course Below ) \n\n"
+    "https://docs.google.com/presentation/d/1F_k8P0lX3eizRbb87Q8FQzTNJYq1ufimxLUikOCDxao/edit?usp=sharing \n\n"
+    "Be sure to check out the brand deals section to start making your first bit of online money \n\n"
+)
+
 
 # optional but recommended for fast slash command sync
 GUILD_ID = os.getenv("GUILD_ID")
@@ -70,6 +81,37 @@ DM_REPLY_TEMPLATE = (
 
 )
 
+# New code for the entrace message feature
+
+
+async def send_welcome(member: discord.Member):
+    # ignore bot accounts (optional)
+    if member.bot:
+        return
+
+    channel = member.guild.get_channel(WELCOME_CHANNEL_ID)
+    if channel is None:
+        # fallback: try fetching (handles not-in-cache)
+        try:
+            channel = await bot.fetch_channel(WELCOME_CHANNEL_ID)
+        except Exception:
+            print(
+                f"[welcome] Channel {WELCOME_CHANNEL_ID} not found or no access.")
+            return
+
+    text = WELCOME_MESSAGE.format(
+        mention=member.mention,
+        name=member.name,
+        guild=member.guild.name,
+    )
+    try:
+        await channel.send(text)
+    except discord.Forbidden:
+        print(
+            f"[welcome] Missing permission to send in #{getattr(channel, 'name', WELCOME_CHANNEL_ID)}")
+    except Exception as e:
+        print(f"[welcome] Failed to send: {e}")
+
 
 @bot.event
 async def on_ready():
@@ -89,27 +131,10 @@ async def _get_or_create_tickets_category(guild: discord.Guild) -> discord.Categ
     return await guild.create_category(name, reason="Create tickets category")
 
 
-# class CloseTicketView(discord.ui.View):
-#     def __init__(self, opener_id: int, growi_id: int):
-#         super().__init__(timeout=None)  # persists until bot restarts
-#         self.opener_id = opener_id
-#         self.growi_id = growi_id
+@bot.event
+async def on_member_join(member: discord.Member):
+    await send_welcome(member)
 
-#     @discord.ui.button(label="🔴 Close Ticket", style=discord.ButtonStyle.danger)
-#     async def close_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
-#         user = interaction.user
-#         if (
-#             user.id == self.opener_id
-#             or user.id == self.growi_id
-#             or (isinstance(user, discord.Member) and user.guild_permissions.manage_channels)
-#         ):
-#             await interaction.response.send_message("✅ Closing ticket…", ephemeral=True)
-#             try:
-#                 await interaction.channel.delete(reason=f"Ticket closed by {user}")
-#             except discord.Forbidden:
-#                 await interaction.followup.send("❌ I lack permission to delete this channel.", ephemeral=True)
-#             return
-#         await interaction.response.send_message("⛔ You’re not allowed to close this ticket.", ephemeral=True)
 
 class CloseTicketView(discord.ui.View):
     def __init__(self):
@@ -257,49 +282,6 @@ async def on_message(message: discord.Message):
 
 
 @bot.event
-# async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
-#     try:
-#         # ignores bots own reaction
-#         if payload.user_id == bot.user.id:
-#             return
-#         # Is this message bound?
-#         binding = find_binding(payload.message_id)
-#         if not binding:
-#             return
-#         # Optional: restrict to a specific emoji
-#         target_emoji = binding.get("✅") or "ANY"
-#         if target_emoji != "ANY":
-#             # payload.emoji.name works for unicode; for custom emojis use payload.emoji.id or str(payload.emoji)
-#             if payload.emoji.name != target_emoji and str(payload.emoji) != target_emoji:
-#                 return
-#         # Fetch user
-#         user = bot.get_user(payload.user_id) or await bot.fetch_user(payload.user_id)
-#         # DM them the form
-#         try:
-#             await user.send(f"Here is your **{binding['brand']}** onboarding form:\n{binding['form']}")
-#         except Exception:
-#             # Fallback: notify in channel (public, because reaction events aren't interactions)
-#             try:
-#                 channel = bot.get_channel(payload.channel_id) or await bot.fetch_channel(payload.channel_id)
-#                 await channel.send(f"<@{payload.user_id}>, I couldn't DM you. Please enable **Allow DMs from server members** or ask an admin for the **{binding['brand']}** form.")
-#             except Exception:
-#                 pass
-#         # Optional: remove the user's reaction to keep message tidy (requires Manage Messages)
-#         try:
-#             if payload.guild_id:
-#                 guild = bot.get_guild(payload.guild_id) or await bot.fetch_guild(payload.guild_id)
-#                 member = guild.get_member(payload.user_id) or await guild.fetch_member(payload.user_id)
-#             else:
-#                 member = None
-#             channel = bot.get_channel(payload.channel_id) or await bot.fetch_channel(payload.channel_id)
-#             message = await channel.fetch_message(payload.message_id)
-#             if member:
-#                 await message.remove_reaction(payload.emoji, member)
-#         except Exception:
-#             pass
-#     except Exception as e:
-#         print("Reaction handler error:", e)
-@bot.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     try:
         # ignore bot's own reaction
@@ -344,20 +326,6 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
                 _SENT_CACHE[key] = now
             except Exception:
                 pass
-
-        # Optional: remove user's reaction to keep message tidy (needs Manage Messages)
-        # try:
-        #     channel = bot.get_channel(payload.channel_id) or await bot.fetch_channel(payload.channel_id)
-        #     message = await channel.fetch_message(payload.message_id)
-        #     if payload.guild_id:
-        #         guild = bot.get_guild(payload.guild_id) or await bot.fetch_guild(payload.guild_id)
-        #         member = guild.get_member(payload.user_id) or await guild.fetch_member(payload.user_id)
-        #     else:
-        #         member = None
-        #     if member:
-        #         await message.remove_reaction(payload.emoji, member)
-        # except Exception:
-        #     pass
 
     except Exception as e:
         print("Reaction handler error:", e)
