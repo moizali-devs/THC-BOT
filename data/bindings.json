@@ -47,6 +47,14 @@
       "guild_id": "1282010167507943444",
       "channel_id": null,
       "emoji": "ANY"
+    },
+    {
+      "message_id": "1422733715418910880",
+      "brand": "Pum Pums",
+      "form": "https://growi.io/o/pum-pums/c/14508?method=username",
+      "guild_id": "1282010167507943444",
+      "channel_id": "1282723291618082836",
+      "emoji": "ANY"
     }
   ]
 }

@@ -25,7 +25,7 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 # --- Welcome config ---
 WELCOME_CHANNEL_ID = 1282010168015716536  # set in .env
 WELCOME_MESSAGE = (
-    "# Welcome {mention} to **THC**!\n\n"
+    "# Welcome to **THC**!\n\n"
     "Here we will guide you on how to make your first 10k/m online \n\n"
     "Follow the steps below to achieve financial freedom ( Free Course Below ) \n\n"
     "https://docs.google.com/presentation/d/1F_k8P0lX3eizRbb87Q8FQzTNJYq1ufimxLUikOCDxao/edit?usp=sharing \n\n"
