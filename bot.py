@@ -21,15 +21,19 @@ TICKETS_CATEGORY_NAME = "Growi Ticket"
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
+# Applu channel id
+APPLY_CHANNEL_ID = 1282723291618082836
 
 # --- Welcome config ---
 WELCOME_CHANNEL_ID = 1282010168015716536  # set in .env
 WELCOME_MESSAGE = (
-    "Welcome to **THC**!\n\n"
-    "Here we will guide you on how to make your first 10k/m online \n\n"
-    "Follow the steps below to achieve financial freedom ( Free Course Below ) \n\n"
-    "https://docs.google.com/presentation/d/1F_k8P0lX3eizRbb87Q8FQzTNJYq1ufimxLUikOCDxao/edit?usp=sharing \n\n"
-    "Be sure to check out the brand deals section to start making your first bit of online money \n\n"
+    "Hey {mention} — welcome to **THC**! 🎉\n\n"
+    "Here we will guide you on how to make your first 10k/m online.\n\n"
+    "Follow the steps below to achieve financial freedom (Free Course Below):\n"
+    "https://docs.google.com/presentation/d/1F_k8P0lX3eizRbb87Q8FQzTNJYq1ufimxLUikOCDxao/edit?usp=sharing\n\n"
+    "Be sure to check out the brand deals section to start making your first bit of online money.\n\n"
+    # Examples if you want them visible too:
+    # "Name: {name}\nUser ID: {id}\n"
 )
 
 
@@ -81,36 +85,48 @@ DM_REPLY_TEMPLATE = (
 
 )
 
-# New code for the entrace message feature
-
 
 async def send_welcome(member: discord.Member):
-    # ignore bot accounts (optional)
     if member.bot:
         return
 
-    channel = member.guild.get_channel(WELCOME_CHANNEL_ID)
-    if channel is None:
-        # fallback: try fetching (handles not-in-cache)
-        try:
-            channel = await bot.fetch_channel(WELCOME_CHANNEL_ID)
-        except Exception:
-            print(
-                f"[welcome] Channel {WELCOME_CHANNEL_ID} not found or no access.")
-            return
+    # Get your welcome channel (by ID from config)
+    channel = member.guild.get_channel(WELCOME_CHANNEL_ID) or await bot.fetch_channel(WELCOME_CHANNEL_ID)
 
-    text = WELCOME_MESSAGE.format(
-        # mention=member.mention,
-        name=member.name,
+    # --- STEP 1: Send live ping so they get the notification ---
+    live_text = WELCOME_MESSAGE.format(
+        mention=member.mention,               # Real ping
+        name=member.display_name,
+        id=member.id,
         guild=member.guild.name,
     )
-    try:
-        await channel.send(text)
-    except discord.Forbidden:
-        print(
-            f"[welcome] Missing permission to send in #{getattr(channel, 'name', WELCOME_CHANNEL_ID)}")
-    except Exception as e:
-        print(f"[welcome] Failed to send: {e}")
+
+    msg = await channel.send(
+        live_text,
+        allowed_mentions=discord.AllowedMentions(
+            users=True, roles=False, everyone=False)
+    )
+
+    # --- STEP 2: Wait a bit, then make it unclickable ---
+    await asyncio.sleep(2)
+
+    # Option A: Show escaped mention (looks like <@1234> but not clickable)
+    # safe_mention = f"\\<@{member.id}>"
+
+    # Option B: OR show name only (you can comment/uncomment depending on preference)
+    safe_mention = f"`@{member.display_name}`"
+
+    safe_text = WELCOME_MESSAGE.format(
+        mention=safe_mention,
+        name=member.display_name,
+        id=member.id,
+        guild=member.guild.name,
+    )
+
+    await msg.edit(
+        content=safe_text,
+        allowed_mentions=discord.AllowedMentions.none()
+    )
 
 
 @bot.event
@@ -239,15 +255,24 @@ class HelpMenu(discord.ui.View):
         except Exception:
             await interaction.response.send_message("❌ Couldn’t create the ticket.", ephemeral=True)
 
-    @discord.ui.button(label="2️⃣ Apply To brand", style=discord.ButtonStyle.success)
-    async def button_guidance(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("You chose **Guidance** 🧭", ephemeral=True)
+    # @discord.ui.button(label="2️⃣ Apply to brands", style=discord.ButtonStyle.success)
+    # async def button_guidance(self, interaction: discord.Interaction, button: discord.ui.Button):
+    #     await interaction.response.send_message("You chose **Guidance** 🧭", ephemeral=True)
 
-    @discord.ui.button(label="3️⃣ some other issue", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="2️⃣ Apply to Brand", style=discord.ButtonStyle.success, custom_id="apply_btn")
+    async def apply_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        channel_mention = f"<#{APPLY_CHANNEL_ID}>"
+        await interaction.response.send_message(
+            f"All brand deals can be found in {channel_mention}.\n"
+            f"React ✅ to receive the application form in your DMs.",
+            ephemeral=True
+        )
+
+    @discord.ui.button(label="3️⃣ Talk with frhan", style=discord.ButtonStyle.secondary)
     async def button_droid(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message("You chose **Droid Help** 🤖", ephemeral=True)
 
-    @discord.ui.button(label="4️⃣ Something Else", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="4️⃣ Server suggestions", style=discord.ButtonStyle.danger)
     async def button_other(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message("You chose **Other** ⚡", ephemeral=True)
 
