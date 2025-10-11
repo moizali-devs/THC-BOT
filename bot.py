@@ -24,6 +24,14 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 # Applu channel id
 APPLY_CHANNEL_ID = 1282723291618082836
 
+TIER_ROLE_IDS = {
+    1: 1426561330214867046,  # Tier 1
+    2: 1426561377304182894,  # Tier 2
+    3: 1426561426222219348,  # Tier 3
+    4: 1426561451782307891,  # Tier 4
+}
+
+
 # --- Welcome config ---
 WELCOME_CHANNEL_ID = 1282010168015716536  # set in .env
 WELCOME_MESSAGE = (
@@ -240,6 +248,68 @@ async def create_ticket(guild: discord.Guild, opener: discord.Member, growi_user
     )
     return ticket_channel
 
+# -----------------------new code----------------------
+# ---- Tier helpers ----
+
+
+def _member_tier_roles(member: discord.Member):
+    tier_role_ids = set(TIER_ROLE_IDS.values())
+    return [r for r in member.roles if r.id in tier_role_ids]
+
+
+async def assign_tier(member: discord.Member, tier: int):
+    guild = member.guild
+    role_id = TIER_ROLE_IDS.get(tier)
+    if not role_id:
+        raise ValueError(f"Unknown tier {tier}")
+    role = guild.get_role(role_id)
+    if role is None:
+        raise RuntimeError(f"Role ID {role_id} not found in this server.")
+
+    # remove any existing tier roles
+    old_tiers = _member_tier_roles(member)
+    if old_tiers:
+        await member.remove_roles(*old_tiers, reason=f"Tier change -> T{tier}")
+
+    # add the new tier
+    await member.add_roles(role, reason=f"Assigned Tier {tier}")
+
+
+class TierButtons(discord.ui.View):
+    def __init__(self, member: discord.Member):
+        super().__init__(timeout=60)
+        self._member = member
+
+        # Define buttons inline (no separate label dict)
+        self.add_item(self._make_button(
+            1, "Tier 1 • 0–50k GMV", discord.ButtonStyle.success))
+        self.add_item(self._make_button(
+            2, "Tier 2 • 50k–100k GMV", discord.ButtonStyle.success))
+        self.add_item(self._make_button(
+            3, "Tier 3 • 100k–200k GMV", discord.ButtonStyle.success))
+        self.add_item(self._make_button(
+            4, "Tier 4 • 200k+ GMV", discord.ButtonStyle.success))
+
+    def _make_button(self, tier: int, label: str, style: discord.ButtonStyle):
+        async def _callback(interaction: discord.Interaction):
+            # only the requester can use these
+            if interaction.user.id != self._member.id:
+                return await interaction.response.send_message(
+                    "Only the requester can use these buttons.", ephemeral=True
+                )
+            try:
+                await assign_tier(self._member, tier)
+                await interaction.response.send_message(
+                    f"✅ Assigned **Tier {tier}**. Previous tier removed.",
+                    ephemeral=True
+                )
+            except Exception as e:
+                await interaction.response.send_message(f"❌ {e}", ephemeral=True)
+
+        btn = discord.ui.Button(label=label, style=style)
+        btn.callback = _callback
+        return btn
+
 
 class HelpMenu(discord.ui.View):
     def __init__(self):
@@ -259,7 +329,7 @@ class HelpMenu(discord.ui.View):
     # async def button_guidance(self, interaction: discord.Interaction, button: discord.ui.Button):
     #     await interaction.response.send_message("You chose **Guidance** 🧭", ephemeral=True)
 
-    @discord.ui.button(label="2️⃣ Apply to Brand", style=discord.ButtonStyle.success, custom_id="apply_btn")
+    @discord.ui.button(label="2️⃣ Apply to Brand", style=discord.ButtonStyle.secondary, custom_id="apply_btn")
     async def apply_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
         channel_mention = f"<#{APPLY_CHANNEL_ID}>"
         await interaction.response.send_message(
@@ -268,13 +338,17 @@ class HelpMenu(discord.ui.View):
             ephemeral=True
         )
 
-    @discord.ui.button(label="3️⃣ Talk with frhan", style=discord.ButtonStyle.secondary)
-    async def button_droid(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("You chose **Droid Help** 🤖", ephemeral=True)
+    # @discord.ui.button(label="3️⃣4️⃣ Talk with frhan", style=discord.ButtonStyle.primary)
+    # async def button_droid(self, interaction: discord.Interaction, button: discord.ui.Button):
+    #     await interaction.response.send_message("You chose **Droid Help** 🤖", ephemeral=True)
 
-    @discord.ui.button(label="4️⃣ Server suggestions", style=discord.ButtonStyle.danger)
-    async def button_other(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("You chose **Other** ⚡", ephemeral=True)
+    @discord.ui.button(label="3️⃣ Tier / Roles", style=discord.ButtonStyle.success)
+    async def button_tiers(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            "Choose your tier based on your GMV:",
+            view=TierButtons(interaction.user),
+            ephemeral=True
+        )
 
 
 @bot.event

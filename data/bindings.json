@@ -63,6 +63,22 @@
       "guild_id": "1282010167507943444",
       "channel_id": "1282723291618082836",
       "emoji": "ANY"
+    },
+    {
+      "message_id": "1424913063542521856",
+      "brand": "Natsu Skin Tape",
+      "form": "https://growi.io/o/natsu-a430ed1c/c/16790?method=username",
+      "guild_id": "1282010167507943444",
+      "channel_id": "1282723291618082836",
+      "emoji": "ANY"
+    },
+    {
+      "message_id": "1425628624735703081",
+      "brand": "Pet Lab",
+      "form": "https://growi.io/o/pet-labs/c/16788?method=username",
+      "guild_id": "1282010167507943444",
+      "channel_id": "1282723291618082836",
+      "emoji": "ANY"
     }
   ]
 }
