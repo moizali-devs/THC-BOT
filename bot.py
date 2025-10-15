@@ -13,7 +13,7 @@ _SENT_CACHE: dict[tuple[int, int], float] = {}
 
 # --- Ticket config for growi---
 # <-- replace with your Growi person's Discord user ID
-GROWI_USER_ID = 1363412581137780911
+GROWI_USER_ID = 1427318529622933736
 # auto-creates this category; set "" to disable
 TICKETS_CATEGORY_NAME = "Growi Ticket"
 
@@ -25,10 +25,10 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 APPLY_CHANNEL_ID = 1282723291618082836
 
 TIER_ROLE_IDS = {
-    1: 1426561330214867046,  # Tier 1
-    2: 1426561377304182894,  # Tier 2
-    3: 1426561426222219348,  # Tier 3
-    4: 1426561451782307891,  # Tier 4
+    1: 1425403368817426543,  # Tier 1
+    2: 1425403496387186770,  # Tier 2
+    3: 1425403540775370833,  # Tier 3
+    4: 1425403620139991061,  # Tier 4
 }
 
 
