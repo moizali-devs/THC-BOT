@@ -309,6 +309,91 @@ class TierButtons(discord.ui.View):
         btn = discord.ui.Button(label=label, style=style)
         btn.callback = _callback
         return btn
+# new code on Sunday 19th of oct
+
+
+class GetHelpButtons(discord.ui.View):
+    """Second-layer help topics, only clickable by the requester."""
+
+    def __init__(self, member: discord.Member):
+        super().__init__(timeout=120)
+        self._member = member
+
+        # Add as many help topics as you want here:
+        # button 1
+        self.add_item(self._make_button(
+            key="THC_Academy_msg",  # start_no_tts
+            label="THC Academy",
+            style=discord.ButtonStyle.green
+        ))
+        # button 2
+        self.add_item(self._make_button(
+            key="THC_Premium_msg",
+            label="THC Premium",
+            style=discord.ButtonStyle.green
+        ))
+        # # button 3
+        # self.add_item(self._make_button(
+        #     key="content_ideas",
+        #     label="THC Premium",
+        #     style=discord.ButtonStyle.secondary
+        # ))
+
+    def _make_button(self, key: str, label: str, style: discord.ButtonStyle):
+        async def _callback(interaction: discord.Interaction):
+            # Only the person who opened the submenu can use it
+            if interaction.user.id != self._member.id:
+                return await interaction.response.send_message(
+                    "Only the requester can use these buttons.", ephemeral=True
+                )
+
+            # Respond per-topic (edit these texts as you like)
+            if key == "THC_Academy_msg":
+                msg = (
+                    "**THC Academy**\n"
+                    "THC Academy is something we recommend every affiliate goes through. No matter the level.\n\n"
+                    "It’s an **intensive step-by-step walkthrough** showing you how to go from sitting at home lazy 🛋️ "
+                    "to making your first **$10K/month online 💸**.\n\n"
+                    "The goal: start the Academy with zero knowledge and leave feeling like a **top-tier affiliate.**\n\n"
+                    "__**THC Academy Offers:**__\n"
+                    "• Walkthrough from start to finish\n"
+                    "• Intense course (~10 hours of knowledge)\n"
+                    "• Sales psychology fundamentals\n"
+                    "• The mindset of a successful creator\n"
+                    "• Pre-recorded interview calls with **7-figure creators**\n\n"
+                    # "**Join now → [WHOP LINK](https://your.whop.link/here)**"
+                )
+            elif key == "THC_Premium_msg":
+                msg = (
+                    "**THC Premium**\n"
+                    "THC Premium is for creators who are serious about taking their content to the next level. 🚀\n"
+                    "It’s a step up from THC Free — a close-knit, experienced community built to help you grow faster and smarter.\n\n"
+                    "__**THC Premium Offers:**__\n"
+                    "• Exclusive Brand Deals 💼\n"
+                    "• 1-on-1 Feedback from top coaches 🧠\n"
+                    "• A network of the best creators in the space 🌎\n"
+                    "• A closer, more supportive community 🤝\n"
+                    "• Intensive TikTok Shop strategy & growth courses 🎥\n"
+                    "• Live calls and real-time advice 🔥\n"
+                    "• 1-on-1 access to 8-figure brand owners 💰\n\n"
+                    # "**Join now → [WHOP LINK](https://your.whop.link/here)**"
+                )
+
+            elif key == "content_ideas":
+                msg = (
+                    "**Content Ideas / Hooks**\n"
+                    "• “I tried X for 7 days—results shocked me”\n"
+                    "• “3 mistakes killing your Y”\n"
+                    "• “Do this before you buy Z”"
+                )
+            else:
+                msg = "Coming soon."
+
+            await interaction.response.send_message(msg, ephemeral=True)
+
+        btn = discord.ui.Button(label=label, style=style)
+        btn.callback = _callback
+        return btn
 
 
 class HelpMenu(discord.ui.View):
@@ -347,6 +432,15 @@ class HelpMenu(discord.ui.View):
         await interaction.response.send_message(
             "Choose your tier based on your GMV:",
             view=TierButtons(interaction.user),
+            ephemeral=True
+        )
+
+# 👉 NEW BUTTON code on 19th of oct
+    @discord.ui.button(label="4️⃣ Get Started", style=discord.ButtonStyle.primary)
+    async def button_get_help(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            "Pick a help topic:",
+            view=GetHelpButtons(interaction.user),
             ephemeral=True
         )
 
