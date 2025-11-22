@@ -79,6 +79,22 @@
       "guild_id": "1282010167507943444",
       "channel_id": "1282723291618082836",
       "emoji": "ANY"
+    },
+    {
+      "message_id": "1438593549976469586",
+      "brand": "HerAur\u00e9",
+      "form": "https://growi.io/o/heraure-a53e6e15/c/22264?method=username",
+      "guild_id": "1282010167507943444",
+      "channel_id": "1282723291618082836",
+      "emoji": "ANY"
+    },
+    {
+      "message_id": "1439007366476595252",
+      "brand": "Dr Melaxin",
+      "form": "https://growi.io/o/dr-melaxin-72fef2ea/c/22358?method=username",
+      "guild_id": "1282010167507943444",
+      "channel_id": "1282723291618082836",
+      "emoji": "ANY"
     }
   ]
 }

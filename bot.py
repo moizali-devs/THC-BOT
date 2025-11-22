@@ -43,7 +43,24 @@ WELCOME_MESSAGE = (
     # Examples if you want them visible too:
     # "Name: {name}\nUser ID: {id}\n"
 )
+# New Code 15th nov (remove if the code works)
 
+# --- Form config for new members ---
+FORM_DELAY_SECONDS = 5 * 60  # 5 minutes
+
+# --- This is the form link below
+FORM_LINK = "https://forms.gle/YV4PnCjfcMLZk7j48"
+
+# User who will help with the form issue
+HELPER_USER_ID = 1427318529622933736  # TODO: replace with your Discord user ID
+
+FORM_DM_TEMPLATE = (
+    "Hey {name}, welcome to **The Hustlers Club** 🎉\n\n"
+    "To be considered for current and future brand deals inside The Hustlers Club, "
+    "Please fill out this short form:\n"
+    "{form_link}\n\n"
+    "If you face any issues while filling it out, please message {helper_mention}."
+)
 
 # optional but recommended for fast slash command sync
 GUILD_ID = os.getenv("GUILD_ID")
@@ -53,6 +70,7 @@ intents.guilds = True
 intents.guild_reactions = True
 intents.dm_messages = True  # not strictly required to send DMs, but fine to keep
 intents.members = True
+intents.message_content = True
 
 
 class SonOfAndOn(commands.Bot):
@@ -137,6 +155,42 @@ async def send_welcome(member: discord.Member):
     )
 
 
+async def send_delayed_form(member: discord.Member):
+    # Wait 5 minutes before sending
+    await asyncio.sleep(FORM_DELAY_SECONDS)
+
+    # If the member left during the delay, do nothing
+    if member.guild.get_member(member.id) is None:
+        return
+
+    helper_mention = f"<@{HELPER_USER_ID}>"
+
+    try:
+        # Try sending them a DM
+        await member.send(
+            FORM_DM_TEMPLATE.format(
+                name=member.display_name,
+                form_link=FORM_LINK,
+                helper_mention=helper_mention,
+            )
+        )
+    except Exception:
+        # DMs closed or blocked — silently ignore
+        pass
+
+
+# This is fallback code, if the person cannot be dmed the bot (if allowed below will send the message in the welcome channel)
+    # except discord.Forbidden:
+    #     # DMs are closed, fall back to welcome channel
+    #     try:
+    #         channel = member.guild.get_channel(WELCOME_CHANNEL_ID) or await bot.fetch_channel(WELCOME_CHANNEL_ID)
+    #         await channel.send(
+    #             f"{member.mention} to be considered for brand deals in **DaHustlersClub**, "
+    #             f"please fill out this form:\n{FORM_LINK}\n\n"
+    #             f"If you face any issues, please message {helper_mention}."
+    #         )
+
+
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user} (ID: {bot.user.id})")
@@ -158,6 +212,7 @@ async def _get_or_create_tickets_category(guild: discord.Guild) -> discord.Categ
 @bot.event
 async def on_member_join(member: discord.Member):
     await send_welcome(member)
+    asyncio.create_task(send_delayed_form(member))
 
 
 class CloseTicketView(discord.ui.View):
