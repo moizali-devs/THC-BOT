@@ -519,13 +519,13 @@ async def on_message(message: discord.Message):
         await message.channel.send("Hi! 👋 Please choose an option below:", view=view)
         return  # stop here so it doesn’t also send DM_REPLY_TEMPLATE
 
-    # 3) (Optional) Reply in servers if message starts with "A"
-    starts_with_A = message.content.strip().lower().startswith("a")
-    if starts_with_A:
-        try:
-            await message.reply(DM_REPLY_TEMPLATE, mention_author=True)
-        except discord.Forbidden:
-            pass
+    # # 3) (Optional) Reply in servers if message starts with "A"
+    # starts_with_A = message.content.strip().lower().startswith("a")
+    # if starts_with_A:
+    #     try:
+    #         await message.reply(DM_REPLY_TEMPLATE, mention_author=True)
+    #     except discord.Forbidden:
+    #         pass
 
     # keep commands working
     await bot.process_commands(message)
