@@ -40,8 +40,8 @@ WELCOME_MESSAGE = (
     "Follow the steps below to achieve financial freedom (Free Course Below):\n"
     "https://docs.google.com/presentation/d/1F_k8P0lX3eizRbb87Q8FQzTNJYq1ufimxLUikOCDxao/edit?usp=sharing\n\n"
     "Be sure to check out the brand deals section to start making your first bit of online money.\n\n"
-    "Here is the link to our onboarding call! 📞:\n"
-    "https://discord.gg/PZP9e9Ex?event=1442642136485986375\n\n"
+    # "Here is the link to our onboarding call! 📞:\n"
+    # "https://discord.gg/PZP9e9Ex?event=1442642136485986375\n\n"
     # Examples if you want them visible too:
     # "Name: {name}\nUser ID: {id}\n"
 )
