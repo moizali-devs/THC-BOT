@@ -1,4 +1,5 @@
 import os
+import atexit
 import asyncio
 import discord
 import time
@@ -6,6 +7,8 @@ from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
 from store import find_binding
+import re
+from activity_store import load_activity, save_activity
 
 # One DM per (message_id, user_id) per cooldown window
 COOLDOWN_SECONDS = 24 * 60 * 60  # 24h; change as you like
@@ -30,6 +33,64 @@ TIER_ROLE_IDS = {
     3: 1425403540775370833,  # Tier 3
     4: 1425403620139991061,  # Tier 4
 }
+
+#NEW CODE DEC5#----------------------------------------------------------
+# - Badge roles for Bronze - Platinum
+# TODO: replace these with real role IDs from your server
+BADGE_ROLE_IDS = {
+    "bronze": 1447644206897303765,      # e.g. 123456789012345678
+    "silver": 1447644686134153286,
+    "gold": 1447644808943370484,
+    "diamond": 1447645001789083839,
+    "platinum": 1447645453259636847,
+}
+
+# - Channel IDs for main chat and wins channel
+# TODO: replace with your actual channel IDs
+MAIN_CHAT_ID = 1291049360473456651      # e.g. 1282010168015716536 or your main chat
+WINS_CHANNEL_ID = 1292975300740644936   # e.g. ID of #wins channel
+
+# - Rank thresholds (example values, tune as you like)
+GOLD_CHAT_MIN = 50
+GOLD_WINS_MIN = 6
+
+DIAMOND_GMV_MIN = 100_000
+DIAMOND_CHAT_MIN = 60
+DIAMOND_WINS_MIN = 5
+
+PLATINUM_GMV_MIN = 250_000
+PLATINUM_CHAT_MIN = 150
+PLATINUM_WINS_MIN = 10
+
+# - Load activity data at startup
+# activity: dict[str(user_id)] -> {"chat_msgs": int, "wins": int, "gmv": int}
+ACTIVITY = load_activity()
+
+#something 
+@atexit.register
+def _flush_activity_on_exit():
+    try:
+        if ACTIVITY:
+            save_activity(ACTIVITY)
+    except Exception:
+        pass
+
+
+# Save to disk at most once every 10 minutes
+SAVE_ACTIVITY_INTERVAL = 10 * 60  # 10 minutes
+_last_activity_save = time.time()
+
+
+def maybe_flush_activity():
+    """
+    Save ACTIVITY to disk at most once per SAVE_ACTIVITY_INTERVAL.
+    Call this after you change ACTIVITY.
+    """
+    global _last_activity_save
+    now = time.time()
+    if now - _last_activity_save >= SAVE_ACTIVITY_INTERVAL:
+        save_activity(ACTIVITY)
+        _last_activity_save = now
 
 
 # --- Welcome config ---
@@ -331,6 +392,107 @@ async def assign_tier(member: discord.Member, tier: int):
     # add the new tier
     await member.add_roles(role, reason=f"Assigned Tier {tier}")
 
+# ---- Badge helpers ----
+
+def _member_badge_roles(member: discord.Member):
+    badge_role_ids = set(BADGE_ROLE_IDS.values())
+    return [r for r in member.roles if r.id in badge_role_ids]
+
+
+async def assign_badge(member: discord.Member, badge_key: str, reason: str = ""):
+    guild = member.guild
+    role_id = BADGE_ROLE_IDS.get(badge_key)
+    if not role_id:
+        raise ValueError(f"Unknown badge key {badge_key} or role ID missing")
+
+    role = guild.get_role(role_id)
+    if role is None:
+        raise RuntimeError(f"Badge role ID {role_id} not found in this server")
+
+    # remove any existing badge roles
+    old_badges = _member_badge_roles(member)
+    if old_badges:
+        await member.remove_roles(*old_badges, reason=reason or f"Badge change -> {badge_key}")
+
+    # add the new badge
+    await member.add_roles(role, reason=reason or f"Assigned badge {badge_key}")
+
+
+# ---- Activity helpers ----
+
+def _get_stats(member: discord.Member) -> dict:
+    user_key = str(member.id)
+    stats = ACTIVITY.get(user_key)
+    if stats is None:
+        stats = {"chat_msgs": 0, "wins": 0, "gmv": 0}
+        ACTIVITY[user_key] = stats
+    # ensure fields exist even if file is old
+    stats.setdefault("chat_msgs", 0)
+    stats.setdefault("wins", 0)
+    stats.setdefault("gmv", 0)
+    return stats
+
+
+def _current_badge_key(member: discord.Member) -> str | None:
+    badge_by_id = {v: k for k, v in BADGE_ROLE_IDS.items()}
+    for r in member.roles:
+        key = badge_by_id.get(r.id)
+        if key:
+            return key
+    return None
+
+
+def _badge_rank_index(badge_key: str | None) -> int:
+    order = ["bronze", "silver", "gold", "diamond", "platinum"]
+    if badge_key is None:
+        return -1
+    try:
+        return order.index(badge_key)
+    except ValueError:
+        return -1
+
+#newcode#
+async def _check_for_rank_upgrade(member: discord.Member):
+    """
+    Called every time we update stats or GMV.
+    Decides if user should be upgraded based on thresholds.
+    """
+    stats = _get_stats(member)
+    chat_msgs = stats["chat_msgs"]
+    wins = stats["wins"]
+    gmv = stats["gmv"]
+
+    current = _current_badge_key(member)
+    current_idx = _badge_rank_index(current)
+
+    best = None
+    best_idx = current_idx
+
+    # Bronze and Silver are normally triggered by specific actions,
+    # but we still treat them in the order chain
+    # Gold
+    if chat_msgs >= GOLD_CHAT_MIN and wins >= GOLD_WINS_MIN:
+        if _badge_rank_index("gold") > best_idx:
+            best = "gold"
+            best_idx = _badge_rank_index("gold")
+
+    # Diamond
+    if gmv >= DIAMOND_GMV_MIN and chat_msgs >= DIAMOND_CHAT_MIN and wins >= DIAMOND_WINS_MIN:
+        if _badge_rank_index("diamond") > best_idx:
+            best = "diamond"
+            best_idx = _badge_rank_index("diamond")
+
+    # Platinum
+    if gmv >= PLATINUM_GMV_MIN and chat_msgs >= PLATINUM_CHAT_MIN and wins >= PLATINUM_WINS_MIN:
+        if _badge_rank_index("platinum") > best_idx:
+            best = "platinum"
+            best_idx = _badge_rank_index("platinum")
+
+    if best and best_idx > current_idx:
+        await assign_badge(member, best, reason="Auto badge upgrade from activity")
+        maybe_flush_activity()
+
+
 
 class TierButtons(discord.ui.View):
     def __init__(self, member: discord.Member):
@@ -502,24 +664,118 @@ class HelpMenu(discord.ui.View):
         )
 
 
+
 @bot.event
 async def on_message(message: discord.Message):
     # ignore bots (including ourselves)
     if message.author.bot:
         return
+        
+    content = message.content or ""
+    lowered = content.lower()
 
-    # 1) Reply to **DMs to the bot**
+    # 1) Reply to DMs to the bot
     if isinstance(message.channel, discord.DMChannel):
         await message.reply(DM_REPLY_TEMPLATE)
         return
 
-    # 2) If bot is mentioned → show interactive menu
-    if bot.user and bot.user in message.mentions:
+    # 2) Activity tracking and Bronze/Silver triggers in guild channels
+    if isinstance(message.channel, discord.TextChannel):
+        member = message.author
+        channel_id = message.channel.id
+        # content = message.content or ""
+        # lowered = content.lower()
+
+        # Only track users who talk (this call creates stats entry)
+        stats = _get_stats(member)
+
+   
+        # Count main chat messages
+        if MAIN_CHAT_ID and channel_id == MAIN_CHAT_ID:
+            stats["chat_msgs"] += 1
+
+            # Bronze trigger: in main chat, message contains intro and mentions bot
+            if bot.user and bot.user in message.mentions:
+                if re.search(r"\bintro\b", lowered):
+                    try:
+                        await assign_badge(member, "bronze", reason="Bronze intro trigger")
+
+                        # Try to DM the user privately about the badge
+                        try:
+                            await member.send(
+                                "You have unlocked the **Bronze** badge in THC "
+                                "for introducing yourself in the main chat. 🎉"
+                            )
+                        except discord.Forbidden:
+                            # If their DMs are closed, fall back to a short public confirmation
+                            await message.channel.send(
+                                f"{member.mention} you have unlocked the **Bronze** badge.",
+                                allowed_mentions=discord.AllowedMentions(users=[member])
+                            )
+
+                        maybe_flush_activity()
+                    except Exception as e:
+                        print("Bronze assign error:", e)
+
+
+
+        # Count wins in wins channel
+        # Count wins in wins channel
+        if WINS_CHANNEL_ID and channel_id == WINS_CHANNEL_ID:
+
+            # Detection: must mention bot AND contain the word "win"
+            if bot.user and bot.user in message.mentions:
+                if re.search(r"\bwin\b", lowered):
+                    stats["wins"] += 1
+
+                    # Silver trigger: bump to Silver immediately
+                    try:
+                        await assign_badge(member, "silver", reason="Silver win trigger")
+
+                        # Try to DM the user privately
+                        try:
+                            await member.send(
+                                "You have unlocked the **Silver** badge in THC "
+                                "for sharing your win in the server. 🎉"
+                            )
+                        except discord.Forbidden:
+                            # If their DMs are closed, fall back to short public confirmation
+                            await message.channel.send(
+                                f"{member.mention} you have unlocked the **Silver** badge.",
+                                allowed_mentions=discord.AllowedMentions(users=[member])
+                            )
+
+                        maybe_flush_activity()
+
+                    except Exception as e:
+                        print("Silver assign error:", e)
+
+                else:
+                    # still count as a win activity even if 'win' wasn't matched perfectly
+                    stats["wins"] += 1
+
+            else:
+                # message in wins channel without bot mention still counts as activity
+                stats["wins"] += 1
+
+        
+        # After updating stats, maybe flush to disk every 10 minutes
+        maybe_flush_activity()
+
+        # After updating stats, check for rank upgrades (Gold / Diamond / Platinum)
+        try:
+            await _check_for_rank_upgrade(member)
+        except Exception as e:
+            print("Rank upgrade check error:", e)
+
+    # 3) If bot is mentioned → show interactive menu
+    # but do NOT show it for intro/win messages that are used for badges
+    if bot.user and bot.user in message.mentions and not re.search(r"\b(intro|win)\b", lowered):
         view = HelpMenu()
         await message.channel.send("Hi! 👋 Please choose an option below:", view=view)
-        return  # stop here so it doesn’t also send DM_REPLY_TEMPLATE
+        return
 
-    # # 3) (Optional) Reply in servers if message starts with "A"
+    # # 4) Optional reply in servers if message starts with "A"
     # starts_with_A = message.content.strip().lower().startswith("a")
     # if starts_with_A:
     #     try:
@@ -529,6 +785,7 @@ async def on_message(message: discord.Message):
 
     # keep commands working
     await bot.process_commands(message)
+
 
 
 @bot.event
@@ -579,6 +836,34 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 
     except Exception as e:
         print("Reaction handler error:", e)
+
+#newcode#
+# ---- GMV management command ----
+
+@bot.tree.command(name="setgmv", description="Set GMV for a user for badge ranking (staff only).")
+@app_commands.describe(user="User to set GMV for", amount="Total GMV for this user")
+async def setgmv(interaction: discord.Interaction, user: discord.Member, amount: int):
+    # Only allow admins or manage_roles to use this
+    if not isinstance(interaction.user, discord.Member) or not (
+        interaction.user.guild_permissions.manage_roles or
+        interaction.user.guild_permissions.administrator
+    ):
+        await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
+        return
+
+    stats = _get_stats(user)
+    stats["gmv"] = max(0, int(amount))
+    maybe_flush_activity()
+
+    # Reevaluate their rank based on new GMV
+    await _check_for_rank_upgrade(user)
+
+    await interaction.response.send_message(
+        f"Set GMV for {user.mention} to **{stats['gmv']}**. Badge has been rechecked.",
+        allowed_mentions=discord.AllowedMentions(users=[user]),
+        ephemeral=True
+    )
+
 
 
 def main():
