@@ -788,56 +788,135 @@ async def on_message(message: discord.Message):
 
 
 
+# @bot.event
+# async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+#     try:
+#         # ignore bot's own reaction
+#         if payload.user_id == bot.user.id:
+#             return
+
+#         # Is this message bound?
+#         binding = find_binding(payload.message_id)
+#         if not binding:
+#             return
+
+#         # Require ✅ (either because it's stored, or force it if binding was ANY)
+#         target_emoji = binding.get("emoji") or "ANY"
+#         if target_emoji != "ANY":
+#             if payload.emoji.name != target_emoji and str(payload.emoji) != target_emoji:
+#                 return
+#         else:
+#             # force ✅ for old ANY bindings
+#             if payload.emoji.name != "✅" and str(payload.emoji) != "✅":
+#                 return
+
+#         # One DM per user per message (with cooldown)
+#         key = (payload.message_id, payload.user_id)
+#         now = time.time()
+#         if now - _SENT_CACHE.get(key, 0) < COOLDOWN_SECONDS:
+#             return
+
+#         # Fetch user and DM
+#         user = bot.get_user(payload.user_id) or await bot.fetch_user(payload.user_id)
+#         try:
+#             # here is what the user will receive
+#             await user.send(f"Here is your **{binding['brand']}** onboarding form:\n{binding['form']}")
+#             _SENT_CACHE[key] = now
+#         except Exception:
+#             # Fallback: notify in channel (public)
+#             try:
+#                 channel = bot.get_channel(payload.channel_id) or await bot.fetch_channel(payload.channel_id)
+#                 await channel.send(
+#                     f"<@{payload.user_id}>, I couldn't DM you. Please enable **Allow DMs from server members** "
+#                     f"or ask an admin for the **{binding['brand']}** form."
+#                 )
+#                 _SENT_CACHE[key] = now
+#             except Exception:
+#                 pass
+
+#     except Exception as e:
+#         print("Reaction handler error:", e)
+
+# new code
 @bot.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     try:
-        # ignore bot's own reaction
+        # Ignore bot's own reactions
         if payload.user_id == bot.user.id:
             return
 
-        # Is this message bound?
+        # Find binding for this message
         binding = find_binding(payload.message_id)
         if not binding:
             return
 
-        # Require ✅ (either because it's stored, or force it if binding was ANY)
-        target_emoji = binding.get("emoji") or "ANY"
+        # Enforce guild and channel if stored
+        if binding.get("guild_id") and str(payload.guild_id) != str(binding.get("guild_id")):
+            return
+        if binding.get("channel_id") and str(payload.channel_id) != str(binding.get("channel_id")):
+            return
+
+        # Emoji check
+        target_emoji = binding.get("emoji", "ANY")
+
         if target_emoji != "ANY":
-            if payload.emoji.name != target_emoji and str(payload.emoji) != target_emoji:
+            if str(payload.emoji) != target_emoji and getattr(payload.emoji, "name", None) != target_emoji:
                 return
         else:
-            # force ✅ for old ANY bindings
-            if payload.emoji.name != "✅" and str(payload.emoji) != "✅":
+            # Old ANY bindings now require ✅
+            if str(payload.emoji) != "✅" and getattr(payload.emoji, "name", None) != "✅":
                 return
 
-        # One DM per user per message (with cooldown)
+        # Cooldown check
         key = (payload.message_id, payload.user_id)
         now = time.time()
         if now - _SENT_CACHE.get(key, 0) < COOLDOWN_SECONDS:
             return
 
-        # Fetch user and DM
-        user = bot.get_user(payload.user_id) or await bot.fetch_user(payload.user_id)
-        try:
-            # here is what the user will receive
-            await user.send(f"Here is your **{binding['brand']}** onboarding form:\n{binding['form']}")
-            _SENT_CACHE[key] = now
-        except Exception:
-            # Fallback: notify in channel (public)
+        # Assign role if present
+        role_id_raw = binding.get("role_id")
+        if role_id_raw:
             try:
-                channel = bot.get_channel(payload.channel_id) or await bot.fetch_channel(payload.channel_id)
-                await channel.send(
-                    f"<@{payload.user_id}>, I couldn't DM you. Please enable **Allow DMs from server members** "
-                    f"or ask an admin for the **{binding['brand']}** form."
+                role_id = int(role_id_raw)
+                guild = bot.get_guild(payload.guild_id) or await bot.fetch_guild(payload.guild_id)
+                member = guild.get_member(payload.user_id) or await guild.fetch_member(payload.user_id)
+                role = guild.get_role(role_id)
+                if role:
+                    await member.add_roles(
+                        role,
+                        reason=f"Reaction role for {binding.get('brand', 'deal')}"
+                    )
+            except Exception as e:
+                print("Reaction role assign error:", e)
+
+        # DM form if present
+        form = (binding.get("form") or "").strip()
+        if form:
+            user = bot.get_user(payload.user_id) or await bot.fetch_user(payload.user_id)
+            try:
+                await user.send(
+                    f"Here is your **{binding.get('brand','')}** onboarding form:\n{form}"
                 )
-                _SENT_CACHE[key] = now
             except Exception:
-                pass
+                # Fallback to channel message if DMs are closed
+                try:
+                    channel = bot.get_channel(payload.channel_id) or await bot.fetch_channel(payload.channel_id)
+                    await channel.send(
+                        f"<@{payload.user_id}>, I could not DM you. "
+                        f"Please enable **Allow DMs from server members** "
+                        f"or contact an admin for the **{binding.get('brand','')}** form."
+                    )
+                except Exception:
+                    pass
+
+        # Update cooldown after successful handling
+        _SENT_CACHE[key] = now
 
     except Exception as e:
         print("Reaction handler error:", e)
 
-#newcode#
+
+
 # ---- GMV management command ----
 
 @bot.tree.command(name="setgmv", description="Set GMV for a user for badge ranking (staff only).")
@@ -864,6 +943,45 @@ async def setgmv(interaction: discord.Interaction, user: discord.Member, amount:
         ephemeral=True
     )
 
+# ----New Role Giving Command --- # 
+@bot.tree.command(name="bind_role_react", description="Bind a message reaction to a role assignment")
+@app_commands.describe(
+    message_id="Message ID to bind",
+    role="Role to assign",
+    emoji="Emoji to accept, default ✅",
+    brand="Label for this deal, like Goalie",
+    channel="Channel where the message is"
+)
+async def bind_role_react(
+    interaction: discord.Interaction,
+    message_id: str,
+    role: discord.Role,
+    channel: discord.TextChannel,
+    brand: str = "Deal",
+    emoji: str = "✅",
+):
+    # Permission gate
+    if not interaction.user.guild_permissions.manage_guild:
+        await interaction.response.send_message("You need Manage Server to bind this.", ephemeral=True)
+        return
+
+    # Save binding
+    from store import upsert_binding
+    upsert_binding(
+        message_id=int(message_id),
+        brand=brand,
+        form="",  # no DM by default
+        guild_id=interaction.guild_id,
+        channel_id=channel.id,
+        emoji=emoji,
+        kind="role",
+        role_id=role.id,
+    )
+
+    await interaction.response.send_message(
+        f"Bound message {message_id} to role {role.mention} on emoji {emoji}.",
+        ephemeral=True
+    )
 
 
 def main():

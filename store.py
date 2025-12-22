@@ -25,8 +25,42 @@ def load_bindings():
 def save_bindings(bindings):
     _write({"bindings": bindings})
 
+# old working code 
+# def upsert_binding(message_id: int, brand: str, form: str, guild_id: int | None, channel_id: int | None, emoji: str = "ANY"):
+#     bindings = load_bindings()
+#     for i, b in enumerate(bindings):
+#         if b["message_id"] == str(message_id):
+#             bindings[i] = {
+#                 "message_id": str(message_id),
+#                 "brand": brand,
+#                 "form": form,
+#                 "guild_id": str(guild_id) if guild_id else None,
+#                 "channel_id": str(channel_id) if channel_id else None,
+#                 "emoji": emoji
+#             }
+#             save_bindings(bindings)
+#             return
+#     bindings.append({
+#         "message_id": str(message_id),
+#         "brand": brand,
+#         "form": form,
+#         "guild_id": str(guild_id) if guild_id else None,
+#         "channel_id": str(channel_id) if channel_id else None,
+#         "emoji": emoji
+#     })
+#     save_bindings(bindings)
 
-def upsert_binding(message_id: int, brand: str, form: str, guild_id: int | None, channel_id: int | None, emoji: str = "ANY"):
+# NEW CODE: 
+def upsert_binding(
+    message_id: int,
+    brand: str,
+    form: str,
+    guild_id: int | None,
+    channel_id: int | None,
+    emoji: str = "ANY",
+    kind: str = "form",
+    role_id: int | None = None,
+):
     bindings = load_bindings()
     for i, b in enumerate(bindings):
         if b["message_id"] == str(message_id):
@@ -36,19 +70,25 @@ def upsert_binding(message_id: int, brand: str, form: str, guild_id: int | None,
                 "form": form,
                 "guild_id": str(guild_id) if guild_id else None,
                 "channel_id": str(channel_id) if channel_id else None,
-                "emoji": emoji
+                "emoji": emoji,
+                "kind": kind,
+                "role_id": str(role_id) if role_id else None,
             }
             save_bindings(bindings)
             return
+
     bindings.append({
         "message_id": str(message_id),
         "brand": brand,
         "form": form,
         "guild_id": str(guild_id) if guild_id else None,
         "channel_id": str(channel_id) if channel_id else None,
-        "emoji": emoji
+        "emoji": emoji,
+        "kind": kind,
+        "role_id": str(role_id) if role_id else None,
     })
     save_bindings(bindings)
+
 
 
 def remove_binding(message_id: int | str):
