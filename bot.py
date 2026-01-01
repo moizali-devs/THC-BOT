@@ -29,8 +29,9 @@ PAYMENTS_TICKETS_CATEGORY_NAME = "💫 PAYMENTS 💫"
 
 # Roles allowed to view payment tickets and close them
 PAYMENTS_STAFF_ROLE_IDS = [
-    563044854792323082,  # TODO: role ID 1
-    1427318529622933736,  # TODO: role ID 2
+    1350197846963654687,  # TODO: role ID 1
+    1291054567491895387,
+    1282014675932020736,  # TODO: role ID 2
     # 0,  # optional role ID 3
 ]
 
