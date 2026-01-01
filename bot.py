@@ -20,6 +20,21 @@ GROWI_USER_ID = 1427318529622933736
 # auto-creates this category; set "" to disable
 TICKETS_CATEGORY_NAME = "Growi Ticket"
 
+# --- Ticket config for payments ---
+# Public channel where the payment panel message lives
+PAYMENTS_REQUEST_CHANNEL_ID = 1454840634450903308  # TODO: put your #request-payment channel ID here
+
+# Category where private payment ticket channels will be created
+PAYMENTS_TICKETS_CATEGORY_NAME = "💫 PAYMENTS 💫"
+
+# Roles allowed to view payment tickets and close them
+PAYMENTS_STAFF_ROLE_IDS = [
+    1427318529622933736,  # TODO: role ID 1
+    0,  # TODO: role ID 2
+    # 0,  # optional role ID 3
+]
+
+
 # on_raw_reaction_add gives us payload even if message isn't cached
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -34,7 +49,7 @@ TIER_ROLE_IDS = {
     4: 1425403620139991061,  # Tier 4
 }
 
-#NEW CODE DEC5#----------------------------------------------------------
+
 # - Badge roles for Bronze - Platinum
 # TODO: replace these with real role IDs from your server
 BADGE_ROLE_IDS = {
@@ -96,17 +111,17 @@ def maybe_flush_activity():
 # --- Welcome config ---
 WELCOME_CHANNEL_ID = 1282010168015716536  # set in .env
 WELCOME_MESSAGE = (
-    "Hey {mention} — welcome to **THC**! 🎉\n\n"
+    "Hey {mention}, welcome to **THC**! 🎉\n\n"
     "Here we will guide you on how to make your first 10k/m online.\n\n"
     "Follow the steps below to achieve financial freedom (Free Course Below):\n"
     "https://docs.google.com/presentation/d/1F_k8P0lX3eizRbb87Q8FQzTNJYq1ufimxLUikOCDxao/edit?usp=sharing\n\n"
     "Be sure to check out the brand deals section to start making your first bit of online money.\n\n"
-    # "Here is the link to our onboarding call! 📞:\n"
-    # "https://discord.gg/PZP9e9Ex?event=1442642136485986375\n\n"
-    # Examples if you want them visible too:
-    # "Name: {name}\nUser ID: {id}\n"
+    "We also actively post **live opportunities and application based roles** on our official website.\n"
+    "If you are looking to apply for available positions and brand related opportunities, visit the link below:\n\n"
+    "https://www.thehustlersclub.net/jobs\n\n"
+    "Applications are reviewed regularly, so make sure to apply if you find something relevant."
 )
-# New Code 15th nov (remove if the code works)
+
 
 # --- Form config for new members ---
 FORM_DELAY_SECONDS = 5 * 60  # 5 minutes
@@ -147,6 +162,8 @@ class SonOfAndOn(commands.Bot):
 
         # IMPORTANT: register persistent views once on boot
         self.add_view(CloseTicketView())
+        self.add_view(ClosePaymentTicketView())
+        self.add_view(PaymentRequestView())
 
         if GUILD_ID:
             guild = discord.Object(id=int(GUILD_ID))
@@ -258,8 +275,192 @@ async def send_delayed_form(member: discord.Member):
 async def on_ready():
     print(f"✅ Logged in as {bot.user} (ID: {bot.user.id})")
 
-# new code
+
 # ---------- Tickets: helpers ----------
+def _is_payments_staff(member: discord.Member) -> bool:
+    if not isinstance(member, discord.Member):
+        return False
+    if member.guild_permissions.manage_channels or member.guild_permissions.administrator:
+        return True
+    staff_ids = set(int(x) for x in PAYMENTS_STAFF_ROLE_IDS if int(x) != 0)
+    return any(r.id in staff_ids for r in member.roles)
+
+
+def _sanitize_channel_slug(name: str) -> str:
+    # Keep it Discord channel name friendly
+    name = (name or "").strip().lower()
+    name = re.sub(r"\s+", "-", name)
+    name = re.sub(r"[^a-z0-9\-]", "", name)
+    name = re.sub(r"-{2,}", "-", name).strip("-")
+    return name or "user"
+
+
+async def _get_or_create_payments_category(guild: discord.Guild) -> discord.CategoryChannel | None:
+    name = (PAYMENTS_TICKETS_CATEGORY_NAME or "").strip()
+    if not name:
+        return None
+    cat = discord.utils.get(guild.categories, name=name)
+    if cat:
+        return cat
+    return await guild.create_category(name, reason="Create payments tickets category")
+
+
+async def _unique_channel_name_in_category(category: discord.CategoryChannel | None, base_name: str) -> str:
+    # If category is None, we still try to avoid collisions across guild text channels
+    base = base_name[:90]
+    if category:
+        existing = {c.name for c in category.text_channels}
+    else:
+        existing = set()
+
+    if base not in existing:
+        return base
+
+    i = 2
+    while True:
+        candidate = f"{base}-{i}"
+        candidate = candidate[:90]
+        if candidate not in existing:
+            return candidate
+        i += 1
+
+
+class ClosePaymentTicketView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="🔴 Close Ticket",
+        style=discord.ButtonStyle.danger,
+        custom_id="thc:payments_close_ticket"
+    )
+    async def close_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
+        member = interaction.user
+        if not isinstance(member, discord.Member):
+            return await interaction.response.send_message("⛔ Not allowed.", ephemeral=True)
+
+        if not _is_payments_staff(member):
+            return await interaction.response.send_message(
+                "⛔ Only payments staff can close this ticket.",
+                ephemeral=True
+            )
+
+        await interaction.response.send_message("✅ Closing ticket…", ephemeral=True)
+        try:
+            await interaction.channel.delete(reason=f"Payments ticket closed by {member}")
+        except discord.Forbidden:
+            await interaction.followup.send(
+                "❌ I lack permission to delete this channel (need Manage Channels).",
+                ephemeral=True
+            )
+
+
+async def create_payment_ticket(guild: discord.Guild, opener: discord.Member) -> discord.TextChannel:
+    staff_role_ids = [int(x) for x in PAYMENTS_STAFF_ROLE_IDS if int(x) != 0]
+
+    # Resolve staff roles from IDs
+    staff_roles = []
+    for rid in staff_role_ids:
+        role = guild.get_role(rid)
+        if role:
+            staff_roles.append(role)
+
+    if not staff_roles:
+        raise RuntimeError("No valid PAYMENTS_STAFF_ROLE_IDS found. Add role IDs in config.")
+
+    bot_member: discord.Member | None = guild.me
+
+    # Build overwrites (private channel)
+    overwrites: dict = {
+        guild.default_role: discord.PermissionOverwrite(view_channel=False),
+        opener: discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+            read_message_history=True,
+            attach_files=True,
+            embed_links=True
+        ),
+    }
+
+    for role in staff_roles:
+        overwrites[role] = discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+            read_message_history=True,
+            attach_files=True,
+            embed_links=True
+        )
+
+    if bot_member:
+        overwrites[bot_member] = discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+            read_message_history=True,
+            attach_files=True,
+            embed_links=True,
+            manage_messages=True
+        )
+
+    category = await _get_or_create_payments_category(guild)
+
+    # Name must be payment-username (your requirement)
+    base_slug = _sanitize_channel_slug(opener.display_name)
+    base_name = f"payment-{base_slug}"
+    channel_name = await _unique_channel_name_in_category(category, base_name)
+
+    ticket_channel = await guild.create_text_channel(
+        name=channel_name,
+        topic=f"PAYMENT | Opened by {opener} ({opener.id})",
+        overwrites=overwrites,
+        category=category,
+        reason=f"Payment ticket opened by {opener}",
+    )
+
+    # Welcome message with Close button for staff only
+    welcome = (
+        f"✅ **Payment Ticket Created**\n\n"
+        f"Hi {opener.mention}, please share the details below so we can process this faster:\n\n"
+        f"1) **Brand name**\n"
+        f"2) **Amount requested**\n"
+        f"3) **Payment method** (Wise, PayPal, Bank, etc)\n"
+        f"4) **Proof / screenshots** (required)\n"
+        f"5) **Any links or invoice details** (optional)\n\n"
+        f"Once everything is verified, the payments team will proceed.\n\n"
+        f"Payments staff can close this ticket using the button below."
+    )
+
+    await ticket_channel.send(welcome, view=ClosePaymentTicketView())
+    return ticket_channel
+
+
+class PaymentRequestView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="💳 Request Payment",
+        style=discord.ButtonStyle.primary,
+        custom_id="thc:payments_request_payment"
+    )
+    async def request_payment(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not interaction.guild or not isinstance(interaction.user, discord.Member):
+            return await interaction.response.send_message("⛔ This only works in the server.", ephemeral=True)
+
+        # Optional: ensure they are clicking from the correct channel
+        if PAYMENTS_REQUEST_CHANNEL_ID and interaction.channel and interaction.channel.id != PAYMENTS_REQUEST_CHANNEL_ID:
+            return await interaction.response.send_message(
+                "Please use the payment request panel in the correct channel.",
+                ephemeral=True
+            )
+
+        await interaction.response.send_message("✅ Creating your payment ticket…", ephemeral=True)
+
+        try:
+            ch = await create_payment_ticket(interaction.guild, interaction.user)
+            await interaction.followup.send(f"✅ Ticket created: {ch.mention}", ephemeral=True)
+        except Exception as e:
+            await interaction.followup.send(f"❌ Could not create ticket: {e}", ephemeral=True)
+
 
 
 async def _get_or_create_tickets_category(guild: discord.Guild) -> discord.CategoryChannel | None:
@@ -366,7 +567,7 @@ async def create_ticket(guild: discord.Guild, opener: discord.Member, growi_user
     )
     return ticket_channel
 
-# -----------------------new code----------------------
+
 # ---- Tier helpers ----
 
 
@@ -451,7 +652,7 @@ def _badge_rank_index(badge_key: str | None) -> int:
     except ValueError:
         return -1
 
-#newcode#
+
 async def _check_for_rank_upgrade(member: discord.Member):
     """
     Called every time we update stats or GMV.
@@ -528,7 +729,7 @@ class TierButtons(discord.ui.View):
         btn = discord.ui.Button(label=label, style=style)
         btn.callback = _callback
         return btn
-# new code on Sunday 19th of oct
+
 
 
 class GetHelpButtons(discord.ui.View):
@@ -654,7 +855,7 @@ class HelpMenu(discord.ui.View):
             ephemeral=True
         )
 
-# 👉 NEW BUTTON code on 19th of oct
+
     @discord.ui.button(label="4️⃣ Get Started", style=discord.ButtonStyle.primary)
     async def button_get_help(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message(
@@ -837,7 +1038,7 @@ async def on_message(message: discord.Message):
 #     except Exception as e:
 #         print("Reaction handler error:", e)
 
-# new code
+
 @bot.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     try:
@@ -982,6 +1183,30 @@ async def bind_role_react(
         f"Bound message {message_id} to role {role.mention} on emoji {emoji}.",
         ephemeral=True
     )
+@bot.tree.command(name="post_payment_panel", description="Post the payment request panel with a button (payments staff only).")
+@app_commands.describe(channel="Channel where the panel should be posted")
+async def post_payment_panel(interaction: discord.Interaction, channel: discord.TextChannel):
+    if not isinstance(interaction.user, discord.Member) or not _is_payments_staff(interaction.user):
+        await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
+        return
+
+    # Optional: keep panel only in the configured channel
+    if PAYMENTS_REQUEST_CHANNEL_ID and channel.id != PAYMENTS_REQUEST_CHANNEL_ID:
+        await interaction.response.send_message(
+            "This panel must be posted in the configured payment request channel.",
+            ephemeral=True
+        )
+        return
+
+    panel_text = (
+        "**Payment Requests**\n\n"
+        "Click the button below to open a private payment ticket with the team.\n"
+        "Please only open a ticket when you are ready to provide proof and details."
+    )
+
+    await channel.send(panel_text, view=PaymentRequestView())
+    await interaction.response.send_message(f"✅ Payment panel posted in {channel.mention}.", ephemeral=True)
+
 
 
 def main():
