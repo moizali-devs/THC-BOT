@@ -517,21 +517,28 @@ class CloseTicketView(discord.ui.View):
             await interaction.followup.send("❌ I lack permission to delete this channel (need **Manage Channels**).", ephemeral=True)
 
 
-async def create_ticket(guild: discord.Guild, opener: discord.Member, growi_user_id: int) -> discord.TextChannel:
-    """Create a private ticket channel for opener + growi user + bot. Prevents duplicates."""
+async def create_ticket(
+    guild: discord.Guild,
+    opener: discord.Member,
+    growi_user_id: int,
+    *,
+    ticket_type: str = "growi",
+    channel_prefix: str = "ticket",
+    intro_message: str | None = None,
+) -> discord.TextChannel:
+    """Create a private ticket channel for opener + growi user + bot. Prevents duplicates per ticket_type."""
     growi_member: discord.Member | None = guild.get_member(growi_user_id)
     bot_member: discord.Member | None = guild.me
 
     if growi_member is None:
         raise RuntimeError("Configured Growi user not found in this server.")
 
-    # Prevent duplicates by tagging topic
-    ticket_tag = f"TICKET:{opener.id}"
+    # Prevent duplicates per ticket type
+    ticket_tag = f"TICKET:{ticket_type}:{opener.id}"
     for ch in guild.text_channels:
         if ch.topic and ticket_tag in ch.topic:
-            return ch  # return existing channel
+            return ch
 
-    # Build overwrites
     overwrites = {
         guild.default_role: discord.PermissionOverwrite(view_channel=False),
         opener: discord.PermissionOverwrite(
@@ -548,24 +555,28 @@ async def create_ticket(guild: discord.Guild, opener: discord.Member, growi_user
         )
 
     category = await _get_or_create_tickets_category(guild)
-    channel_name = f"ticket-{opener.name}".lower().replace(" ", "-")[:90]
+
+    safe_name = opener.name.lower().replace(" ", "-")
+    channel_name = f"{channel_prefix}-{safe_name}"[:90]
 
     ticket_channel = await guild.create_text_channel(
         name=channel_name,
         topic=f"{ticket_tag} | Opened by {opener} ({opener.id})",
         overwrites=overwrites,
         category=category,
-        reason=f"Ticket opened by {opener}",
+        reason=f"{ticket_type} ticket opened by {opener}",
     )
 
-    # Drop close button
     view = CloseTicketView()
-    await ticket_channel.send(
-        f"Hello {opener.mention}! This is your private support channel.\n"
-        f"{growi_member.mention} and <@{bot_member.id}> are here.\n"
-        f"Click **Close Ticket** when you’re done.",
-        view=view,
-    )
+
+    if intro_message is None:
+        intro_message = (
+            f"Hello {opener.mention}! This is your private support channel.\n"
+            f"{growi_member.mention} and <@{bot_member.id}> are here.\n"
+            f"Click **Close Ticket** when you’re done."
+        )
+
+    await ticket_channel.send(intro_message, view=view)
     return ticket_channel
 
 
@@ -864,6 +875,33 @@ class HelpMenu(discord.ui.View):
             view=GetHelpButtons(interaction.user),
             ephemeral=True
         )
+    
+    @discord.ui.button(label="5️⃣ Select Referral", style=discord.ButtonStyle.primary)
+    async def button_referral(self, interaction: discord.Interaction, button: discord.ui.Button):
+        referral_msg = (
+            f"{interaction.user.mention} please answer the questions below:\n\n"
+            "1) Creator or brand owner?\n"
+            "2) Brand name?\n"
+            "3) Brand owner contact?\n"
+            "4) Platform and niche?\n"
+            "5) Estimated budget?\n\n"
+            "Share as much detail as you can so we can move fast."
+        )
+
+        try:
+            ch = await create_ticket(
+                interaction.guild,
+                interaction.user,
+                GROWI_USER_ID,
+                ticket_type="referral",
+                channel_prefix="referral",
+                intro_message=referral_msg,
+            )
+            await interaction.response.send_message(f"✅ Referral ticket ready: {ch.mention}", ephemeral=True)
+        except RuntimeError as e:
+            await interaction.response.send_message(f"⚠️ {e}", ephemeral=True)
+        except Exception:
+            await interaction.response.send_message("❌ Couldn’t create the referral ticket.", ephemeral=True)
 
 
 
