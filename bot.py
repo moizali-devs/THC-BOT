@@ -121,6 +121,9 @@ WELCOME_MESSAGE = (
     "If you are looking to apply for available positions and brand related opportunities, visit the link below:\n\n"
     "https://www.thehustlersclub.net/jobs\n\n"
     "Applications are reviewed regularly, so make sure to apply if you find something relevant."
+    # add this message at the bottom of the welcome message
+    #Would definitely recommend to tune in to our weekly onboarding call to run you through the server and to answer any questions you have regarding creating and with THC -  https://discord.com/events/1282010167507943444/1442642136485986375/1476375714201600000
+    "Would definitely recommend to tune in to our weekly onboarding call to run you through the server and to answer any questions you have regarding creating and with THC -  https://discord.com/events/1282010167507943444/1442642136485986375/1476375714201600000"
 )
 
 
