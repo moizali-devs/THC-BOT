@@ -1,0 +1,96 @@
+2026-04-18 23:12:55 [INFO] discord.client: logging in using static token
+2026-04-18 23:12:56 [INFO] thcbot: Synced 11 commands to guild 1282010167507943444
+2026-04-18 23:12:57 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: dd03eb68715a7da4e6a6d62e677b8035).
+2026-04-18 23:12:59 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: WELCOME_CHANNEL_ID=1282010168015716536 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: MAIN_CHAT_ID=1291049360473456651 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: WINS_CHANNEL_ID=1292975300740644936 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: TIER_ROLE_IDS[1]=1425403368817426543 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: TIER_ROLE_IDS[2]=1425403496387186770 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: TIER_ROLE_IDS[3]=1425403540775370833 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: TIER_ROLE_IDS[4]=1425403620139991061 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[bronze]=1447644206897303765 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[silver]=1447644686134153286 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[gold]=1447644808943370484 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[diamond]=1447645001789083839 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[platinum]=1447645453259636847 not found in guild 'Anton'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: WELCOME_CHANNEL_ID=1282010168015716536 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: MAIN_CHAT_ID=1291049360473456651 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: WINS_CHANNEL_ID=1292975300740644936 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: TIER_ROLE_IDS[1]=1425403368817426543 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: TIER_ROLE_IDS[2]=1425403496387186770 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: TIER_ROLE_IDS[3]=1425403540775370833 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: TIER_ROLE_IDS[4]=1425403620139991061 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[bronze]=1447644206897303765 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[silver]=1447644686134153286 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[gold]=1447644808943370484 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[diamond]=1447645001789083839 not found in guild 'Testing_mk1'
+2026-04-18 23:12:59 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[platinum]=1447645453259636847 not found in guild 'Testing_mk1'
+2026-04-18 23:14:49 [INFO] discord.client: logging in using static token
+2026-04-18 23:14:52 [INFO] thcbot: Synced 11 commands to guild 1282010167507943444
+2026-04-18 23:14:53 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 663869d3d2479bfa6e08f20352ee45a2).
+2026-04-18 23:14:55 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: WELCOME_CHANNEL_ID=1282010168015716536 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: MAIN_CHAT_ID=1291049360473456651 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: WINS_CHANNEL_ID=1292975300740644936 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: TIER_ROLE_IDS[1]=1425403368817426543 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: TIER_ROLE_IDS[2]=1425403496387186770 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: TIER_ROLE_IDS[3]=1425403540775370833 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: TIER_ROLE_IDS[4]=1425403620139991061 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[bronze]=1447644206897303765 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[silver]=1447644686134153286 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[gold]=1447644808943370484 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[diamond]=1447645001789083839 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[platinum]=1447645453259636847 not found in guild 'Anton'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: WELCOME_CHANNEL_ID=1282010168015716536 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: MAIN_CHAT_ID=1291049360473456651 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: WINS_CHANNEL_ID=1292975300740644936 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: TIER_ROLE_IDS[1]=1425403368817426543 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: TIER_ROLE_IDS[2]=1425403496387186770 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: TIER_ROLE_IDS[3]=1425403540775370833 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: TIER_ROLE_IDS[4]=1425403620139991061 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[bronze]=1447644206897303765 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[silver]=1447644686134153286 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[gold]=1447644808943370484 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[diamond]=1447645001789083839 not found in guild 'Testing_mk1'
+2026-04-18 23:14:55 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[platinum]=1447645453259636847 not found in guild 'Testing_mk1'
+2026-04-18 23:15:32 [INFO] discord.client: logging in using static token
+2026-04-18 23:15:34 [INFO] thcbot: Synced 11 commands to guild 1282010167507943444
+2026-04-18 23:15:34 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 4227a5591d5a295681889499a6fc283e).
+2026-04-18 23:15:36 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: WELCOME_CHANNEL_ID=1282010168015716536 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: MAIN_CHAT_ID=1291049360473456651 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: WINS_CHANNEL_ID=1292975300740644936 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: TIER_ROLE_IDS[1]=1425403368817426543 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: TIER_ROLE_IDS[2]=1425403496387186770 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: TIER_ROLE_IDS[3]=1425403540775370833 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: TIER_ROLE_IDS[4]=1425403620139991061 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[bronze]=1447644206897303765 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[silver]=1447644686134153286 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[gold]=1447644808943370484 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[diamond]=1447645001789083839 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[platinum]=1447645453259636847 not found in guild 'Anton'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: WELCOME_CHANNEL_ID=1282010168015716536 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: MAIN_CHAT_ID=1291049360473456651 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: WINS_CHANNEL_ID=1292975300740644936 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: TIER_ROLE_IDS[1]=1425403368817426543 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: TIER_ROLE_IDS[2]=1425403496387186770 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: TIER_ROLE_IDS[3]=1425403540775370833 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: TIER_ROLE_IDS[4]=1425403620139991061 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[bronze]=1447644206897303765 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[silver]=1447644686134153286 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[gold]=1447644808943370484 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[diamond]=1447645001789083839 not found in guild 'Testing_mk1'
+2026-04-18 23:15:36 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[platinum]=1447645453259636847 not found in guild 'Testing_mk1'
+2026-04-18 23:17:25 [INFO] discord.client: logging in using static token
+2026-04-18 23:17:26 [INFO] thcbot: Synced 11 commands to guild 1282010167507943444
+2026-04-18 23:17:27 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: ea398bff0f2f48f39e2439a63d92987f).
+2026-04-18 23:17:29 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-04-18 23:22:09 [INFO] discord.client: logging in using static token
+2026-04-18 23:22:10 [INFO] thcbot: Synced 11 commands to guild 1282010167507943444
+2026-04-18 23:22:11 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: c3f3c904832c3db958f8d32ff0ed6059).
+2026-04-18 23:22:13 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-04-18 23:24:29 [INFO] discord.client: logging in using static token
+2026-04-18 23:24:30 [INFO] thcbot: Synced 11 commands to guild 1282010167507943444
+2026-04-18 23:24:31 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: d92928b00e06fb76bc5f73217d8c2456).
+2026-04-18 23:24:33 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)

@@ -1,6 +1,29 @@
 import re
 from urllib.parse import urlparse
 
+import discord
+
+
+def is_staff(user: discord.Member | discord.User) -> bool:
+    """Return True if the user is trusted by ID, has a staff role, or has manage_roles/administrator."""
+    from config import STAFF_ROLE_IDS, TRUSTED_USER_IDS
+    if user.id in TRUSTED_USER_IDS:
+        return True
+    if isinstance(user, discord.Member):
+        if user.guild_permissions.manage_roles or user.guild_permissions.administrator or user.guild_permissions.manage_messages:
+            return True
+        staff_ids = {rid for rid in STAFF_ROLE_IDS if rid != 0}
+        return any(r.id in staff_ids for r in user.roles)
+    return False
+
+
+def sanitize_channel_slug(name: str) -> str:
+    name = (name or "").strip().lower()
+    name = re.sub(r"\s+", "-", name)
+    name = re.sub(r"[^a-z0-9\-]", "", name)
+    name = re.sub(r"-{2,}", "-", name).strip("-")
+    return name or "user"
+
 LINK_RX = re.compile(r"discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)")
 
 

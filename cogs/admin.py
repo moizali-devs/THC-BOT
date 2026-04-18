@@ -3,7 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ui import Modal, TextInput
 from discord import TextStyle
-from util import parse_message_ref, is_valid_url
+from util import is_staff, is_valid_url, parse_message_ref
 from store import upsert_binding, remove_binding, list_bindings_for_guild
 
 DEFAULT_EMOJI = "ANY"
@@ -77,8 +77,10 @@ class Admin(commands.Cog):
 
     @app_commands.command(name="bind", description="Bind an existing message to a brand & form URL. Reactions on that message will DM the form.")
     @app_commands.describe(message="Message link or ID", brand="Brand name", form="Form URL", emoji="Optional: limit to a specific emoji (default: ANY)")
-    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.default_permissions(manage_messages=True)
     async def bind(self, interaction: discord.Interaction, message: str, brand: str, form: str, emoji: str | None = None):
+        if not is_staff(interaction.user):
+            return await interaction.response.send_message("⛔ You don't have permission to use this.", ephemeral=True)
         if not is_valid_url(form):
             return await interaction.response.send_message("❌ Invalid URL.", ephemeral=True)
         try:
@@ -103,8 +105,10 @@ class Admin(commands.Cog):
     # --- /unbind ---
     @app_commands.command(name="unbind", description="Remove a binding by message link or ID.")
     @app_commands.describe(message="Message link or ID")
-    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.default_permissions(manage_messages=True)
     async def unbind(self, interaction: discord.Interaction, message: str):
+        if not is_staff(interaction.user):
+            return await interaction.response.send_message("⛔ You don't have permission to use this.", ephemeral=True)
         try:
             ref = parse_message_ref(message)
         except ValueError as e:
@@ -114,8 +118,10 @@ class Admin(commands.Cog):
 
     # --- /list_binds ---
     @app_commands.command(name="list_binds", description="List all current message → form bindings.")
-    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.default_permissions(manage_messages=True)
     async def list_binds(self, interaction: discord.Interaction):
+        if not is_staff(interaction.user):
+            return await interaction.response.send_message("⛔ You don't have permission to use this.", ephemeral=True)
         binds = list_bindings_for_guild(interaction.guild_id)
         if not binds:
             return await interaction.response.send_message("_No bindings yet._", ephemeral=True)
@@ -133,8 +139,10 @@ class Admin(commands.Cog):
         description="Open a form: paste the message to post, then provide brand name and form link. I’ll post & bind it."
     )
     @app_commands.describe(channel="Where to post the announcement")
-    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.default_permissions(manage_messages=True)
     async def newbrand(self, interaction: discord.Interaction, channel: discord.TextChannel):
+        if not is_staff(interaction.user):
+            return await interaction.response.send_message("⛔ You don’t have permission to use this.", ephemeral=True)
         modal = NewBrandModal(target_channel=channel)
         await interaction.response.send_modal(modal)
 
@@ -142,8 +150,10 @@ class Admin(commands.Cog):
 
     @app_commands.command(name="post_onboard", description="Post an onboarding message and auto-bind it.")
     @app_commands.describe(channel="Target text channel", brand="Brand name", form="Form URL", emoji="Optional emoji to pre-react with")
-    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.default_permissions(manage_messages=True)
     async def post_onboard(self, interaction: discord.Interaction, channel: discord.TextChannel, brand: str, form: str, emoji: str | None = None):
+        if not is_staff(interaction.user):
+            return await interaction.response.send_message("⛔ You don't have permission to use this.", ephemeral=True)
         if not is_valid_url(form):
             return await interaction.response.send_message("❌ Invalid URL.", ephemeral=True)
 
@@ -165,7 +175,83 @@ class Admin(commands.Cog):
         await interaction.response.send_message(f"✅ Posted & bound message **{msg.id}** for **{brand}**.", ephemeral=True)
 
 
+    # --- /setbadge ---
+
+    @app_commands.command(
+        name="setbadge",
+        description="Manually assign a badge to a member (staff only).",
+    )
+    @app_commands.describe(
+        user="Member to assign the badge to",
+        badge="Badge key: bronze / silver / gold / diamond / platinum",
+    )
+    @app_commands.default_permissions(manage_messages=True)
+    async def setbadge(
+        self, interaction: discord.Interaction, user: discord.Member, badge: str
+    ):
+        if not is_staff(interaction.user):
+            return await interaction.response.send_message("⛔ You don't have permission to use this.", ephemeral=True)
+        badge = badge.strip().lower()
+        valid = {"bronze", "silver", "gold", "diamond", "platinum"}
+        if badge not in valid:
+            return await interaction.response.send_message(
+                f"❌ Invalid badge. Choose from: {', '.join(sorted(valid))}",
+                ephemeral=True,
+            )
+
+        from cogs.badges import assign_badge  # lazy import — badges cog loaded after admin
+
+        try:
+            await assign_badge(user, badge, reason=f"Manual override by {interaction.user}")
+            await interaction.response.send_message(
+                f"✅ Assigned **{badge}** badge to {user.mention}.",
+                allowed_mentions=discord.AllowedMentions(users=[user]),
+                ephemeral=True,
+            )
+        except Exception as e:
+            await interaction.response.send_message(f"❌ {e}", ephemeral=True)
+
+    # --- /bind_role_react ---
+
+    @app_commands.command(
+        name="bind_role_react",
+        description="Bind a message reaction to a role assignment.",
+    )
+    @app_commands.describe(
+        message_id="Message ID to bind",
+        role="Role to assign on reaction",
+        channel="Channel where the message lives",
+        brand="Label for this deal",
+        emoji="Emoji to accept (default ✅)",
+    )
+    @app_commands.default_permissions(manage_messages=True)
+    async def bind_role_react(
+        self,
+        interaction: discord.Interaction,
+        message_id: str,
+        role: discord.Role,
+        channel: discord.TextChannel,
+        brand: str = "Deal",
+        emoji: str = "✅",
+    ):
+        if not is_staff(interaction.user):
+            return await interaction.response.send_message("⛔ You don't have permission to use this.", ephemeral=True)
+        upsert_binding(
+            message_id=int(message_id),
+            brand=brand,
+            form="",
+            guild_id=interaction.guild_id,
+            channel_id=channel.id,
+            emoji=emoji,
+            kind="role",
+            role_id=role.id,
+        )
+        await interaction.response.send_message(
+            f"Bound message {message_id} to role {role.mention} on emoji {emoji}.",
+            ephemeral=True,
+        )
+
+
 async def setup(bot: commands.Bot):
     test_guild = None
-    # If you want to register only to your test guild for fast propagation, set GUILD_ID in env and use it in bot.py sync
     await bot.add_cog(Admin(bot, test_guild))
