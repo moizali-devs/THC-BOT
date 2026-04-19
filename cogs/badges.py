@@ -1,3 +1,4 @@
+import asyncio
 import atexit
 import logging
 import re
@@ -29,6 +30,8 @@ logger = logging.getLogger("thcbot")
 
 ACTIVITY: dict = load_activity()
 _last_activity_save = time.time()
+_activity_dirty = False
+_activity_flush_task: asyncio.Task | None = None
 
 _DM_REPLY = (
     "# 🎉 Welcome to the THC Server 🎉\n"
@@ -58,11 +61,31 @@ def _flush_activity_on_exit():
 
 
 def maybe_flush_activity():
-    global _last_activity_save
-    now = time.time()
-    if now - _last_activity_save >= SAVE_ACTIVITY_INTERVAL:
-        save_activity(ACTIVITY)
-        _last_activity_save = now
+    global _activity_dirty, _activity_flush_task
+    _activity_dirty = True
+    if _activity_flush_task and not _activity_flush_task.done():
+        return
+    loop = asyncio.get_running_loop()
+    _activity_flush_task = loop.create_task(_flush_activity_background())
+
+
+async def _flush_activity_background():
+    global _activity_dirty, _last_activity_save, _activity_flush_task
+    try:
+        while _activity_dirty:
+            delay = SAVE_ACTIVITY_INTERVAL - (time.time() - _last_activity_save)
+            if delay > 0:
+                await asyncio.sleep(delay)
+
+            if not _activity_dirty:
+                break
+
+            _activity_dirty = False
+            snapshot = {user_id: dict(stats) for user_id, stats in ACTIVITY.items()}
+            await asyncio.to_thread(save_activity, snapshot)
+            _last_activity_save = time.time()
+    finally:
+        _activity_flush_task = None
 
 
 def _get_stats(member: discord.Member) -> dict:

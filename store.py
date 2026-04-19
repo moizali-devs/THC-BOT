@@ -4,6 +4,8 @@ import tempfile
 import os
 
 PATH = Path("data/bindings.json")
+_BINDINGS_CACHE: list[dict] | None = None
+_BINDINGS_BY_MESSAGE: dict[str, dict] = {}
 
 
 def _safe_write(path: Path, data):
@@ -29,11 +31,25 @@ def _write(data):
     _safe_write(PATH, data)
 
 
+def _set_bindings_cache(bindings):
+    global _BINDINGS_CACHE, _BINDINGS_BY_MESSAGE
+    _BINDINGS_CACHE = list(bindings)
+    _BINDINGS_BY_MESSAGE = {b["message_id"]: b for b in _BINDINGS_CACHE}
+
+
+def _get_bindings_cache():
+    global _BINDINGS_CACHE
+    if _BINDINGS_CACHE is None:
+        _set_bindings_cache(_read().get("bindings", []))
+    return _BINDINGS_CACHE
+
+
 def load_bindings():
-    return _read().get("bindings", [])
+    return list(_get_bindings_cache())
 
 
 def save_bindings(bindings):
+    _set_bindings_cache(bindings)
     _write({"bindings": bindings})
 
 # old working code 
@@ -110,10 +126,8 @@ def remove_binding(message_id: int | str):
 
 def find_binding(message_id: int | str):
     ms = str(message_id)
-    for b in load_bindings():
-        if b["message_id"] == ms:
-            return b
-    return None
+    _get_bindings_cache()
+    return _BINDINGS_BY_MESSAGE.get(ms)
 
 
 def list_bindings_for_guild(guild_id: int | str):
