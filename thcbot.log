@@ -98,3 +98,74 @@
 2026-04-19 10:30:04 [INFO] thcbot: Synced 11 commands to guild 1282010167507943444
 2026-04-19 10:30:05 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 5ded1c7ae045831085a6429d4e32e00f).
 2026-04-19 10:30:07 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-04-29 23:13:38 [INFO] discord.client: logging in using static token
+2026-04-29 23:13:39 [INFO] thcbot: Synced 12 commands to guild 1282010167507943444
+2026-04-29 23:13:40 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: af2570d157e5e54929e767bacc7dc6b8).
+2026-04-29 23:13:42 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-04-29 23:18:23 [ERROR] discord.app_commands.tree: Ignoring exception in command 'top_posts'
+Traceback (most recent call last):
+  File "C:\Users\moizp\AppData\Local\Python\pythoncore-3.12-64\Lib\site-packages\discord\app_commands\commands.py", line 858, in _do_call
+    return await self._callback(self.binding, interaction, **params)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Work\THC-BOT\cogs\growi_stats.py", line 95, in top_posts
+    await interaction.followup.send(embed=embed)
+  File "C:\Users\moizp\AppData\Local\Python\pythoncore-3.12-64\Lib\site-packages\discord\webhook\async_.py", line 1900, in send
+    data = await adapter.execute_webhook(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moizp\AppData\Local\Python\pythoncore-3.12-64\Lib\site-packages\discord\webhook\async_.py", line 226, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50035): Invalid Form Body
+In embeds.0.fields.0.name: Must be 256 or fewer in length.
+In embeds.0.fields.1.name: Must be 256 or fewer in length.
+In embeds.0.fields.2.name: Must be 256 or fewer in length.
+In embeds.0.fields.3.name: Must be 256 or fewer in length.
+In embeds.0.fields.4.name: Must be 256 or fewer in length.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\moizp\AppData\Local\Python\pythoncore-3.12-64\Lib\site-packages\discord\app_commands\tree.py", line 1297, in _call
+    await command._invoke_with_namespace(interaction, namespace)
+  File "C:\Users\moizp\AppData\Local\Python\pythoncore-3.12-64\Lib\site-packages\discord\app_commands\commands.py", line 884, in _invoke_with_namespace
+    return await self._do_call(interaction, transformed_values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moizp\AppData\Local\Python\pythoncore-3.12-64\Lib\site-packages\discord\app_commands\commands.py", line 877, in _do_call
+    raise CommandInvokeError(self, e) from e
+discord.app_commands.errors.CommandInvokeError: Command 'top_posts' raised an exception: HTTPException: 400 Bad Request (error code: 50035): Invalid Form Body
+In embeds.0.fields.0.name: Must be 256 or fewer in length.
+In embeds.0.fields.1.name: Must be 256 or fewer in length.
+In embeds.0.fields.2.name: Must be 256 or fewer in length.
+In embeds.0.fields.3.name: Must be 256 or fewer in length.
+In embeds.0.fields.4.name: Must be 256 or fewer in length.
+2026-04-29 23:25:03 [INFO] discord.client: logging in using static token
+2026-04-29 23:25:04 [INFO] thcbot: Synced 12 commands to guild 1418296088397484074
+2026-04-29 23:25:05 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: cea0277c38db02dc46889409771ea61f).
+2026-04-29 23:25:07 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: WELCOME_CHANNEL_ID=1282010168015716536 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: MAIN_CHAT_ID=1291049360473456651 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: WINS_CHANNEL_ID=1292975300740644936 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: TIER_ROLE_IDS[1]=1425403368817426543 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: TIER_ROLE_IDS[2]=1425403496387186770 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: TIER_ROLE_IDS[3]=1425403540775370833 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: TIER_ROLE_IDS[4]=1425403620139991061 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[bronze]=1447644206897303765 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[silver]=1447644686134153286 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[gold]=1447644808943370484 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[diamond]=1447645001789083839 not found in guild 'Testing_mk1'
+2026-04-29 23:25:07 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[platinum]=1447645453259636847 not found in guild 'Testing_mk1'
+2026-04-29 23:29:48 [INFO] discord.client: logging in using static token
+2026-04-29 23:29:49 [INFO] thcbot: Synced 13 commands to guild 1418296088397484074
+2026-04-29 23:29:50 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: e96e944d7a84ceda9d997676baf5b62f).
+2026-04-29 23:29:52 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: WELCOME_CHANNEL_ID=1282010168015716536 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: MAIN_CHAT_ID=1291049360473456651 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: WINS_CHANNEL_ID=1292975300740644936 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: TIER_ROLE_IDS[1]=1425403368817426543 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: TIER_ROLE_IDS[2]=1425403496387186770 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: TIER_ROLE_IDS[3]=1425403540775370833 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: TIER_ROLE_IDS[4]=1425403620139991061 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[bronze]=1447644206897303765 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[silver]=1447644686134153286 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[gold]=1447644808943370484 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[diamond]=1447645001789083839 not found in guild 'Testing_mk1'
+2026-04-29 23:29:52 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[platinum]=1447645453259636847 not found in guild 'Testing_mk1'

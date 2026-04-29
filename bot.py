@@ -34,6 +34,7 @@ _EXTENSIONS = [
     "cogs.badges",
     "cogs.reactions",
     "cogs.help_menu",
+    "cogs.growi_stats",
 ]
 
 
