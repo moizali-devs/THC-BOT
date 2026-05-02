@@ -2,16 +2,20 @@ import asyncio
 import logging
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 from config import (
+    EMBED_COLOR_GOLD,
     FORM_DELAY_SECONDS,
     FORM_DM_TEMPLATE,
     FORM_LINK,
     HELPER_USER_ID,
+    ONBOARDING_CALL_URL,
+    PRODUCTS_URL,
     WELCOME_CHANNEL_ID,
-    WELCOME_MESSAGE,
 )
+from util import is_staff
 
 logger = logging.getLogger("thcbot")
 
@@ -31,26 +35,57 @@ class WelcomeCog(commands.Cog):
 
         channel = member.guild.get_channel(WELCOME_CHANNEL_ID) or await self.bot.fetch_channel(WELCOME_CHANNEL_ID)
 
-        live_text = WELCOME_MESSAGE.format(
-            mention=member.mention,
-            name=member.display_name,
-            id=member.id,
-            guild=member.guild.name,
-        )
+        embed = self._build_embed(member)
         msg = await channel.send(
-            live_text,
+            member.mention,
+            embed=embed,
             allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False),
         )
 
         await asyncio.sleep(2)
-        safe_mention = f"`@{member.display_name}`"
-        safe_text = WELCOME_MESSAGE.format(
-            mention=safe_mention,
-            name=member.display_name,
-            id=member.id,
-            guild=member.guild.name,
+        await msg.edit(
+            content=f"`@{member.display_name}`",
+            allowed_mentions=discord.AllowedMentions.none(),
         )
-        await msg.edit(content=safe_text, allowed_mentions=discord.AllowedMentions.none())
+
+    def _build_embed(self, member: discord.Member) -> discord.Embed:
+        guild = member.guild
+        member_count = guild.member_count
+
+        embed = discord.Embed(
+            title=f"🔥 {member.display_name} — Welcome to The Hustlers Club!",
+            description=(
+                f"{member.mention} Your journey to financial freedom starts right here. "
+                f"Let's get it. 💪\n\n"
+                f"**📖 Free Course**\n"
+                f"Access your [free course](https://docs.google.com/presentation/d/1F_k8P0lX3eizRbb87Q8FQzTNJYq1ufimxLUikOCDxao/edit?usp=sharing) and learn how to make your first $10k/month online.\n\n"
+                f"**💰 Products & Commissions**\n"
+                f"Browse our [high-commission product showcase]({PRODUCTS_URL}) and start earning today.\n\n"
+                f"**💼 Jobs & Opportunities**\n"
+                f"Browse [live roles and brand opportunities](https://www.thehustlersclub.net/jobs) — applications reviewed regularly.\n\n"
+                f"**📅 Onboarding Call**\n"
+                f"Tune in to our weekly [onboarding call]({ONBOARDING_CALL_URL}) "
+                f"to get a full walkthrough of the server and ask any questions."
+            ),
+            color=EMBED_COLOR_GOLD,
+        )
+        embed.set_thumbnail(url=member.display_avatar.url)
+        if member_count:
+            embed.set_footer(text=f"Welcome to the server, {member.display_name}!  ·  {member_count:,} members")
+        else:
+            embed.set_footer(text=f"Welcome to the server, {member.display_name}!")
+        return embed
+
+    @app_commands.command(name="testwelcome", description="Preview the welcome embed for a member.")
+    @app_commands.describe(member="Member to preview the welcome for (defaults to you)")
+    async def testwelcome(self, interaction: discord.Interaction, member: discord.Member | None = None):
+        if not is_staff(interaction.user):
+            await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
+            return
+
+        target = member or interaction.user
+        embed = self._build_embed(target)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     async def _send_delayed_form(self, member: discord.Member):
         await asyncio.sleep(FORM_DELAY_SECONDS)
