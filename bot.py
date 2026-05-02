@@ -10,6 +10,7 @@ from config import (
     MAIN_CHAT_ID,
     TIER_ROLE_IDS,
     WELCOME_CHANNEL_ID,
+    WEEKLY_SUMMARY_CHANNEL_ID,
     WINS_CHANNEL_ID,
 )
 
@@ -35,6 +36,7 @@ _EXTENSIONS = [
     "cogs.reactions",
     "cogs.help_menu",
     "cogs.growi_stats",
+    "cogs.weekly_summary",
 ]
 
 
@@ -72,6 +74,7 @@ class SonOfAndOn(commands.Bot):
                 ("WELCOME_CHANNEL_ID", WELCOME_CHANNEL_ID),
                 ("MAIN_CHAT_ID", MAIN_CHAT_ID),
                 ("WINS_CHANNEL_ID", WINS_CHANNEL_ID),
+                ("WEEKLY_SUMMARY_CHANNEL_ID", WEEKLY_SUMMARY_CHANNEL_ID),
             ]:
                 if cid and guild.get_channel(cid) is None:
                     logger.error(

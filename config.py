@@ -131,24 +131,25 @@ PLATINUM_CHAT_MIN = 150     # minimum chat messages
 PLATINUM_WINS_MIN = 10      # minimum wins posted
 
 # -----------------------------------------------------------------------------
+# WEEKLY SUMMARY
+# WEEKLY_SUMMARY_CHANNEL_ID — Channel where the weekly summary embed is posted.
+# WEEKLY_SUMMARY_DAY        — Day of week to post (0=Monday … 6=Sunday).
+# WEEKLY_SUMMARY_HOUR       — Hour (UTC, 24h) to post. Default: 9am UTC Monday.
+# -----------------------------------------------------------------------------
+WEEKLY_SUMMARY_CHANNEL_ID = 0  # Replace with your summary channel ID
+WEEKLY_SUMMARY_DAY = 0   # Monday
+WEEKLY_SUMMARY_HOUR = 9  # 9:00 UTC
+
+# -----------------------------------------------------------------------------
 # WELCOME CONFIG
 # WELCOME_CHANNEL_ID — Channel where new member welcome messages are posted.
-# WELCOME_MESSAGE    — The text sent when a member joins. Supports {mention},
-#                      {name}, {id}, {guild} placeholders.
+# EMBED_COLOR_GOLD   — Accent color for the welcome embed (THC brand gold).
+# PRODUCTS_URL       — Link shown in the welcome embed's products field.
 # -----------------------------------------------------------------------------
 WELCOME_CHANNEL_ID = 1282010168015716536
-WELCOME_MESSAGE = (
-    "Hey {mention}, welcome to **THC**! 🎉\n\n"
-    "Here we will guide you on how to make your first 10k/m online.\n\n"
-    "Follow the steps below to achieve financial freedom (Free Course Below):\n"
-    "https://docs.google.com/presentation/d/1F_k8P0lX3eizRbb87Q8FQzTNJYq1ufimxLUikOCDxao/edit?usp=sharing\n\n"
-    "Be sure to check out the brand deals section to start making your first bit of online money.\n\n"
-    "We also actively post **live opportunities and application based roles** on our official website.\n"
-    "If you are looking to apply for available positions and brand related opportunities, visit the link below:\n\n"
-    "https://www.thehustlersclub.net/jobs\n\n"
-    "Applications are reviewed regularly, so make sure to apply if you find something relevant."
-    "Would definitely recommend to tune in to our weekly onboarding call to run you through the server and to answer any questions you have regarding creating and with THC -  https://discord.com/events/1282010167507943444/1442642136485986375/1476375714201600000"
-)
+EMBED_COLOR_GOLD = 0xFFD700
+PRODUCTS_URL = "https://thc-product-showcase.vercel.app/"
+ONBOARDING_CALL_URL = "https://discord.com/events/1282010167507943444/1442642136485986375/1501742864793600000"
 
 # -----------------------------------------------------------------------------
 # NEW MEMBER FORM

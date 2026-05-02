@@ -2,6 +2,6 @@
 __pycache__/
 *.pyc
 .vscode/
-data/activity.json
+data/
 token.txt
 THC_Bot_Improvement_and_Reliability_Upgrade.docx

@@ -4,6 +4,7 @@ import tempfile
 import os
 
 PATH = Path("data/activity.json")
+WEEKLY_PATH = Path("data/weekly_snapshot.json")
 
 
 def _safe_write(path: Path, data):
@@ -42,3 +43,24 @@ def load_activity() -> dict:
 
 def save_activity(activity: dict):
     _write(activity)
+
+
+def load_weekly_snapshot() -> dict:
+    """
+    Returns:
+    {
+      "wins_snapshot": {"user_id": int, ...},
+      "members_joined": [{"id": int, "name": str, "joined_at": str}, ...],
+      "snapshot_at": str | None
+    }
+    """
+    if WEEKLY_PATH.exists():
+        try:
+            return json.loads(WEEKLY_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"wins_snapshot": {}, "members_joined": [], "snapshot_at": None}
+
+
+def save_weekly_snapshot(data: dict):
+    _safe_write(WEEKLY_PATH, data)
