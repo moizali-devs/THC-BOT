@@ -52,32 +52,6 @@ def save_bindings(bindings):
     _set_bindings_cache(bindings)
     _write({"bindings": bindings})
 
-# old working code 
-# def upsert_binding(message_id: int, brand: str, form: str, guild_id: int | None, channel_id: int | None, emoji: str = "ANY"):
-#     bindings = load_bindings()
-#     for i, b in enumerate(bindings):
-#         if b["message_id"] == str(message_id):
-#             bindings[i] = {
-#                 "message_id": str(message_id),
-#                 "brand": brand,
-#                 "form": form,
-#                 "guild_id": str(guild_id) if guild_id else None,
-#                 "channel_id": str(channel_id) if channel_id else None,
-#                 "emoji": emoji
-#             }
-#             save_bindings(bindings)
-#             return
-#     bindings.append({
-#         "message_id": str(message_id),
-#         "brand": brand,
-#         "form": form,
-#         "guild_id": str(guild_id) if guild_id else None,
-#         "channel_id": str(channel_id) if channel_id else None,
-#         "emoji": emoji
-#     })
-#     save_bindings(bindings)
-
-# NEW CODE: 
 def upsert_binding(
     message_id: int,
     brand: str,

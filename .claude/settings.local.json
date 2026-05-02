@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(python:*)",
-      "WebFetch(domain:growi.mintlify.app)"
+      "WebFetch(domain:growi.mintlify.app)",
+      "WebSearch"
     ]
   }
 }

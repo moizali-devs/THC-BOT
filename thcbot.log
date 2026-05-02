@@ -169,3 +169,43 @@ In embeds.0.fields.4.name: Must be 256 or fewer in length.
 2026-04-29 23:29:52 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[gold]=1447644808943370484 not found in guild 'Testing_mk1'
 2026-04-29 23:29:52 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[diamond]=1447645001789083839 not found in guild 'Testing_mk1'
 2026-04-29 23:29:52 [ERROR] thcbot: Config check: BADGE_ROLE_IDS[platinum]=1447645453259636847 not found in guild 'Testing_mk1'
+2026-05-02 11:39:34 [INFO] discord.client: logging in using static token
+2026-05-02 11:39:35 [INFO] thcbot: Synced 13 commands to guild 1282010167507943444
+2026-05-02 11:39:36 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 7245b47e24b22651881408ee65599bf4).
+2026-05-02 11:39:38 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-05-02 11:44:01 [INFO] discord.client: logging in using static token
+2026-05-02 11:44:03 [INFO] thcbot: Synced 13 commands to guild 1282010167507943444
+2026-05-02 11:44:04 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: a57e526e0a15cb422c75e2e2874da0be).
+2026-05-02 11:44:06 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-05-02 11:51:33 [INFO] discord.client: logging in using static token
+2026-05-02 11:51:34 [INFO] thcbot: Synced 13 commands to guild 1282010167507943444
+2026-05-02 11:51:35 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 7748d5e7eb104934cda4067905241665).
+2026-05-02 11:51:37 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-05-02 11:56:09 [INFO] discord.client: logging in using static token
+2026-05-02 11:56:11 [INFO] thcbot: Synced 13 commands to guild 1282010167507943444
+2026-05-02 11:56:11 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 15ac39996a12b49385042744247f831d).
+2026-05-02 11:56:13 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-05-02 11:56:31 [ERROR] discord.ui.view: Ignoring exception in view <WaveView timeout=900.0 children=1> for item <Button style=<ButtonStyle.primary: 1> url=None disabled=False label='👋  Wave  ·  1' emoji=None row=None sku_id=None id=None>
+Traceback (most recent call last):
+  File "C:\Users\moizp\AppData\Local\Python\pythoncore-3.12-64\Lib\site-packages\discord\ui\view.py", line 555, in _scheduled_task
+    await item.callback(interaction)
+  File "D:\Work\THC-BOT\cogs\welcome.py", line 86, in wave_button
+    await interaction.message.edit(view=self)
+  File "C:\Users\moizp\AppData\Local\Python\pythoncore-3.12-64\Lib\site-packages\discord\message.py", line 2991, in edit
+    data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moizp\AppData\Local\Python\pythoncore-3.12-64\Lib\site-packages\discord\http.py", line 769, in request
+    raise NotFound(response, data)
+discord.errors.NotFound: 404 Not Found (error code: 10008): Unknown Message
+2026-05-02 12:18:51 [INFO] discord.client: logging in using static token
+2026-05-02 12:18:52 [INFO] thcbot: Synced 14 commands to guild 1282010167507943444
+2026-05-02 12:18:53 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: d256cbfc6952e5d93f58a90531532f77).
+2026-05-02 12:18:55 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-05-02 12:23:41 [INFO] discord.client: logging in using static token
+2026-05-02 12:23:42 [INFO] thcbot: Synced 14 commands to guild 1282010167507943444
+2026-05-02 12:23:43 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 0437a2c0838029beaddb697333c90e3e).
+2026-05-02 12:23:45 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-05-02 12:26:59 [INFO] discord.client: logging in using static token
+2026-05-02 12:27:00 [INFO] thcbot: Synced 14 commands to guild 1282010167507943444
+2026-05-02 12:27:02 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 602cf541b80d708b4799394180f3e831).
+2026-05-02 12:27:04 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)

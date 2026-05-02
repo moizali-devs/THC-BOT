@@ -70,9 +70,8 @@ class NewBrandModal(Modal, title="New Brand Onboarding"):
 
 
 class Admin(commands.Cog):
-    def __init__(self, bot: commands.Bot, test_guild: discord.Object | None):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.test_guild = test_guild
     # --- /bind ---
 
     @app_commands.command(name="bind", description="Bind an existing message to a brand & form URL. Reactions on that message will DM the form.")
@@ -253,5 +252,4 @@ class Admin(commands.Cog):
 
 
 async def setup(bot: commands.Bot):
-    test_guild = None
-    await bot.add_cog(Admin(bot, test_guild))
+    await bot.add_cog(Admin(bot))
