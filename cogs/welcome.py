@@ -1,5 +1,7 @@
 import asyncio
 import logging
+import os
+import random
 
 import discord
 from discord import app_commands
@@ -19,6 +21,16 @@ from util import is_staff
 
 logger = logging.getLogger("thcbot")
 
+_WAVE_GIF_DIR = "welcome_gifs"
+
+
+def _random_gif_path() -> str | None:
+    try:
+        files = [f for f in os.listdir(_WAVE_GIF_DIR) if f.lower().endswith(".gif")]
+        return os.path.join(_WAVE_GIF_DIR, random.choice(files)) if files else None
+    except Exception:
+        return None
+
 
 class WelcomeCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -36,11 +48,23 @@ class WelcomeCog(commands.Cog):
         channel = member.guild.get_channel(WELCOME_CHANNEL_ID) or await self.bot.fetch_channel(WELCOME_CHANNEL_ID)
 
         embed = self._build_embed(member)
-        msg = await channel.send(
-            member.mention,
-            embed=embed,
-            allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False),
-        )
+        gif_path = _random_gif_path()
+
+        if gif_path:
+            file = discord.File(gif_path, filename="welcome.gif")
+            embed.set_image(url="attachment://welcome.gif")
+            msg = await channel.send(
+                member.mention,
+                embed=embed,
+                file=file,
+                allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False),
+            )
+        else:
+            msg = await channel.send(
+                member.mention,
+                embed=embed,
+                allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False),
+            )
 
         await asyncio.sleep(2)
         await msg.edit(
@@ -85,7 +109,14 @@ class WelcomeCog(commands.Cog):
 
         target = member or interaction.user
         embed = self._build_embed(target)
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        gif_path = _random_gif_path()
+
+        if gif_path:
+            file = discord.File(gif_path, filename="welcome.gif")
+            embed.set_image(url="attachment://welcome.gif")
+            await interaction.response.send_message(embed=embed, file=file, ephemeral=True)
+        else:
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
     async def _send_delayed_form(self, member: discord.Member):
         await asyncio.sleep(FORM_DELAY_SECONDS)
