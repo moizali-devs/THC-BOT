@@ -23,6 +23,9 @@ logger = logging.getLogger("thcbot")
 
 _WAVE_GIF_DIR = "welcome_gifs"
 
+_FREE_COURSE_URL = "https://docs.google.com/presentation/d/1F_k8P0lX3eizRbb87Q8FQzTNJYq1ufimxLUikOCDxao/edit?usp=sharing"
+_JOBS_URL = "https://www.thehustlersclub.net/jobs"
+
 
 def _random_gif_path() -> str | None:
     try:
@@ -30,6 +33,31 @@ def _random_gif_path() -> str | None:
         return os.path.join(_WAVE_GIF_DIR, random.choice(files)) if files else None
     except Exception:
         return None
+
+
+class WelcomeLinks(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.add_item(discord.ui.Button(
+            label="📖 Free Course",
+            style=discord.ButtonStyle.link,
+            url=_FREE_COURSE_URL,
+        ))
+        self.add_item(discord.ui.Button(
+            label="💰 Products",
+            style=discord.ButtonStyle.link,
+            url=PRODUCTS_URL,
+        ))
+        self.add_item(discord.ui.Button(
+            label="💼 Jobs & Opportunities",
+            style=discord.ButtonStyle.link,
+            url=_JOBS_URL,
+        ))
+        self.add_item(discord.ui.Button(
+            label="📅 Onboarding Call",
+            style=discord.ButtonStyle.link,
+            url=ONBOARDING_CALL_URL,
+        ))
 
 
 class WelcomeCog(commands.Cog):
@@ -57,12 +85,14 @@ class WelcomeCog(commands.Cog):
                 member.mention,
                 embed=embed,
                 file=file,
+                view=WelcomeLinks(),
                 allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False),
             )
         else:
             msg = await channel.send(
                 member.mention,
                 embed=embed,
+                view=WelcomeLinks(),
                 allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False),
             )
 
@@ -80,19 +110,32 @@ class WelcomeCog(commands.Cog):
             title=f"🔥 {member.display_name} — Welcome to The Hustlers Club!",
             description=(
                 f"{member.mention} Your journey to financial freedom starts right here. "
-                f"Let's get it. 💪\n\n"
-                f"**📖 Free Course**\n"
-                f"Access your [free course](https://docs.google.com/presentation/d/1F_k8P0lX3eizRbb87Q8FQzTNJYq1ufimxLUikOCDxao/edit?usp=sharing) and learn how to make your first $10k/month online.\n\n"
-                f"**💰 Products & Commissions**\n"
-                f"Browse our [high-commission product showcase]({PRODUCTS_URL}) and start earning today.\n\n"
-                f"**💼 Jobs & Opportunities**\n"
-                f"Browse [live roles and brand opportunities](https://www.thehustlersclub.net/jobs) — applications reviewed regularly.\n\n"
-                f"**📅 Onboarding Call**\n"
-                f"Tune in to our weekly [onboarding call]({ONBOARDING_CALL_URL}) "
-                f"to get a full walkthrough of the server and ask any questions."
+                f"Let's get it. 💪"
             ),
             color=EMBED_COLOR_GOLD,
         )
+
+        embed.add_field(
+            name="📖 Free Course",
+            value="Step-by-step guide from zero to $10k/month online.",
+            inline=False,
+        )
+        embed.add_field(
+            name="💰 Products & Commissions",
+            value="Browse high-commission products and start earning today.",
+            inline=False,
+        )
+        embed.add_field(
+            name="💼 Jobs & Opportunities",
+            value="Live roles and brand opportunities — applications reviewed regularly.",
+            inline=False,
+        )
+        embed.add_field(
+            name="📅 Onboarding Call",
+            value="Weekly walkthrough of the server. Tune in and ask anything.",
+            inline=False,
+        )
+
         embed.set_thumbnail(url=member.display_avatar.url)
         if member_count:
             embed.set_footer(text=f"Welcome to the server, {member.display_name}!  ·  {member_count:,} members")
@@ -114,9 +157,9 @@ class WelcomeCog(commands.Cog):
         if gif_path:
             file = discord.File(gif_path, filename="welcome.gif")
             embed.set_image(url="attachment://welcome.gif")
-            await interaction.response.send_message(embed=embed, file=file, ephemeral=True)
+            await interaction.response.send_message(embed=embed, file=file, view=WelcomeLinks(), ephemeral=True)
         else:
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, view=WelcomeLinks(), ephemeral=True)
 
     async def _send_delayed_form(self, member: discord.Member):
         await asyncio.sleep(FORM_DELAY_SECONDS)
