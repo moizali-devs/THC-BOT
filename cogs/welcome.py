@@ -127,7 +127,7 @@ class WelcomeCog(commands.Cog):
         )
         embed.add_field(
             name="💼 Jobs & Opportunities",
-            value="Live roles and brand opportunities — applications reviewed regularly.",
+            value="Live roles and brand opportunities, applications reviewed regularly.",
             inline=False,
         )
         embed.add_field(
