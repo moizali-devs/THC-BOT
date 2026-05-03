@@ -13,7 +13,8 @@ from config import (
     FORM_DM_TEMPLATE,
     FORM_LINK,
     HELPER_USER_ID,
-    ONBOARDING_CALL_URL,
+    ONBOARDING_CALL_1_URL,
+    ONBOARDING_CALL_2_URL,
     PRODUCTS_URL,
     WELCOME_CHANNEL_ID,
 )
@@ -52,11 +53,6 @@ class WelcomeLinks(discord.ui.View):
             label="💼 Jobs & Opportunities",
             style=discord.ButtonStyle.link,
             url=_JOBS_URL,
-        ))
-        self.add_item(discord.ui.Button(
-            label="📅 Onboarding Call",
-            style=discord.ButtonStyle.link,
-            url=ONBOARDING_CALL_URL,
         ))
 
 
@@ -131,8 +127,13 @@ class WelcomeCog(commands.Cog):
             inline=False,
         )
         embed.add_field(
-            name="📅 Onboarding Call",
-            value="Weekly walkthrough of the server. Tune in and ask anything.",
+            name="📅 Onboarding Calls",
+            value=f"[Onboarding Call #1]({ONBOARDING_CALL_1_URL}) · [Onboarding Call #2]({ONBOARDING_CALL_2_URL})",
+            inline=False,
+        )
+        embed.add_field(
+            name="👋 Introduce Yourself",
+            value=f"Drop a quick intro in <#1499136008480886924> and say hello!",
             inline=False,
         )
 

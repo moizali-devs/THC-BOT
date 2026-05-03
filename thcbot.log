@@ -209,3 +209,11 @@ discord.errors.NotFound: 404 Not Found (error code: 10008): Unknown Message
 2026-05-02 12:27:00 [INFO] thcbot: Synced 14 commands to guild 1282010167507943444
 2026-05-02 12:27:02 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 602cf541b80d708b4799394180f3e831).
 2026-05-02 12:27:04 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-05-03 08:32:08 [INFO] discord.client: logging in using static token
+2026-05-03 08:32:10 [INFO] thcbot: Synced 14 commands to guild 1282010167507943444
+2026-05-03 08:32:11 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 83184e0b2d6e1fb5168c5856b683395c).
+2026-05-03 08:32:13 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-05-03 08:34:30 [INFO] discord.client: logging in using static token
+2026-05-03 08:34:31 [INFO] thcbot: Synced 14 commands to guild 1282010167507943444
+2026-05-03 08:34:33 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 11764baf97b15058cef134dbb2af4f44).
+2026-05-03 08:34:35 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
