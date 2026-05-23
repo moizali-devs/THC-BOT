@@ -14,7 +14,6 @@ from config import (
     FORM_LINK,
     HELPER_USER_ID,
     ONBOARDING_CALL_1_URL,
-    ONBOARDING_CALL_2_URL,
     PRODUCTS_URL,
     WELCOME_CHANNEL_ID,
 )
@@ -127,13 +126,13 @@ class WelcomeCog(commands.Cog):
             inline=False,
         )
         embed.add_field(
-            name="📅 Onboarding Calls",
-            value=f"[Onboarding Call #1]({ONBOARDING_CALL_1_URL}) · [Onboarding Call #2]({ONBOARDING_CALL_2_URL})",
+            name="📅 Onboarding Call",
+            value=f"[Book your onboarding call here]({ONBOARDING_CALL_1_URL})",
             inline=False,
         )
         embed.add_field(
             name="👋 Introduce Yourself",
-            value=f"Drop a quick intro in <#1499136008480886924> and say hello!",
+            value=f"Drop a quick intro in <#1499136008480886924> and say hello! (And you can be entered in the weekly drawing to win a $25 Gift Card!)",
             inline=False,
         )
 

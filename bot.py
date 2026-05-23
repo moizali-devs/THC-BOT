@@ -37,6 +37,7 @@ _EXTENSIONS = [
     "cogs.help_menu",
     "cogs.growi_stats",
     "cogs.weekly_summary",
+    "cogs.test_panel",
 ]
 
 
