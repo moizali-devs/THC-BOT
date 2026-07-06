@@ -22,13 +22,20 @@ _LAST_CALL_CACHE: dict[tuple[int], float] = {}
 _SYSTEM_PROMPT = (
     "You are a classifier for a Discord community's #wins channel. Members post "
     "screenshots or photos showing earnings, payouts, sales, or other wins. Your job "
-    "is to decide whether the image(s) and caption show a 'big win': a screenshot or "
-    "photo clearly displaying a dollar amount greater than ${threshold} USD. If the "
-    "image does not clearly show a dollar amount greater than the threshold, or the "
-    "image is irrelevant/unclear, classify it as not a big win. "
+    "is to decide whether the image(s) and caption show a 'big win' based on these rules:\n\n"
+    "RULE 1 — PayPal payouts from THC Circle LLC: If the image shows a PayPal payment "
+    "sent by 'THC Circle LLC' (or 'THC Circle'), it is ALWAYS a big win regardless of "
+    "the dollar amount, even if it is only $1.\n\n"
+    "RULE 2 — GMV / dashboard screenshots: If the image shows a creator dashboard or "
+    "analytics screen with a GMV (Gross Merchandise Value) figure, it is only a big win "
+    "if the GMV shown is $20,000 USD or more. GMV values below $20,000 are not big wins.\n\n"
+    "RULE 3 — All other earnings/payout screenshots: If the image shows any other "
+    "payout, earnings, or commission amount, it is a big win only if the dollar amount "
+    "shown is greater than ${threshold} USD.\n\n"
+    "If the image is irrelevant or unclear, classify it as not a big win. "
     "Respond with strict JSON only, no markdown formatting, no code fences, in "
     "exactly this shape: {{\"is_big_win\": true or false, \"reasoning\": \"short "
-    "explanation of what you saw and why\"}}"
+    "explanation of which rule applied and what you saw\"}}"
 ).format(threshold=BIG_WIN_THRESHOLD_USD)
 
 
