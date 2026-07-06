@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from config import (
     BADGE_ROLE_IDS,
+    BIG_WINS_CHANNEL_ID,
     MAIN_CHAT_ID,
     TIER_ROLE_IDS,
     WELCOME_CHANNEL_ID,
@@ -38,6 +39,7 @@ _EXTENSIONS = [
     "cogs.growi_stats",
     "cogs.weekly_summary",
     "cogs.test_panel",
+    "cogs.wins_ai",
 ]
 
 
@@ -75,6 +77,7 @@ class SonOfAndOn(commands.Bot):
                 ("WELCOME_CHANNEL_ID", WELCOME_CHANNEL_ID),
                 ("MAIN_CHAT_ID", MAIN_CHAT_ID),
                 ("WINS_CHANNEL_ID", WINS_CHANNEL_ID),
+                ("BIG_WINS_CHANNEL_ID", BIG_WINS_CHANNEL_ID),
                 ("WEEKLY_SUMMARY_CHANNEL_ID", WEEKLY_SUMMARY_CHANNEL_ID),
             ]:
                 if cid and guild.get_channel(cid) is None:

@@ -103,13 +103,19 @@ BADGE_ROLE_IDS = {
 
 # -----------------------------------------------------------------------------
 # TRACKED CHANNELS
-# MAIN_CHAT_ID    — Channel where chat messages are counted toward badge progress
-#                   and where users say their intro to earn Bronze.
-# WINS_CHANNEL_ID — Channel where win posts are counted. Mentioning the bot with
-#                   the word "win" triggers the Silver badge.
+# MAIN_CHAT_ID          — Channel where chat messages are counted toward badge
+#                         progress and where users say their intro to earn Bronze.
+# WINS_CHANNEL_ID       — Channel where win posts are counted. Mentioning the bot
+#                         with the word "win" triggers the Silver badge.
+# BIG_WINS_CHANNEL_ID   — Channel where AI-classified "big win" screenshots are
+#                         reposted as an embed.
+# BIG_WIN_THRESHOLD_USD — Minimum dollar amount shown in a win screenshot for it
+#                         to be classified as a "big win" by the AI classifier.
 # -----------------------------------------------------------------------------
 MAIN_CHAT_ID = 1291049360473456651
 WINS_CHANNEL_ID = 1292975300740644936
+BIG_WINS_CHANNEL_ID = 1514653953193676840
+BIG_WIN_THRESHOLD_USD = 1000
 
 # -----------------------------------------------------------------------------
 # RANK THRESHOLDS
