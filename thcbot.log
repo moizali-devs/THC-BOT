@@ -229,3 +229,14 @@ discord.errors.NotFound: 404 Not Found (error code: 10008): Unknown Message
 2026-05-23 13:31:32 [INFO] thcbot: Synced 17 commands to guild 1282010167507943444
 2026-05-23 13:31:33 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 3fb4d8b232ba58966b331f8c5fc86af6).
 2026-05-23 13:31:35 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-07-06 13:08:56 [INFO] discord.client: logging in using static token
+2026-07-06 13:08:59 [INFO] thcbot: Synced 17 commands to guild 1282010167507943444
+2026-07-06 13:09:00 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 0c431ac767a9930bece565df03370e4c).
+2026-07-06 13:09:02 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-07-06 13:14:00 [ERROR] thcbot: OPENAI_API_KEY not configured; skipping win classification.
+2026-07-06 13:14:51 [INFO] discord.client: logging in using static token
+2026-07-06 13:14:54 [INFO] thcbot: Synced 17 commands to guild 1282010167507943444
+2026-07-06 13:14:57 [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 922627f805e23c270585413c9493c2ac).
+2026-07-06 13:14:59 [INFO] thcbot: Logged in as THC Bot#7147 (ID: 1395656339203817572)
+2026-07-06 13:15:51 [INFO] httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-06 13:15:51 [INFO] thcbot: Win classification for message 1523603316859469836 by moiz_devs: verdict=big reasoning=The image shows a total GMV of $131.7K, which is clearly over $1000.

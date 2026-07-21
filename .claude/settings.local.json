@@ -3,7 +3,9 @@
     "allow": [
       "Bash(python:*)",
       "WebFetch(domain:growi.mintlify.app)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(pip show *)",
+      "Bash(git add *)"
     ]
   }
 }

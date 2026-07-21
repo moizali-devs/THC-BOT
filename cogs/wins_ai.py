@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 from openai import AsyncOpenAI
 
-from config import BIG_WIN_THRESHOLD_USD, BIG_WINS_CHANNEL_ID, WINS_CHANNEL_ID
+from config import BIG_WINS_CHANNEL_ID, WINS_CHANNEL_ID
 
 logger = logging.getLogger("thcbot")
 
@@ -22,23 +22,16 @@ _LAST_CALL_CACHE: dict[tuple[int], float] = {}
 _SYSTEM_PROMPT = (
     "You are a classifier for a Discord community's #wins channel. Members post "
     "screenshots or photos showing earnings, payouts, sales, or other wins.\n\n"
-    "Apply EXACTLY ONE of the following rules in order:\n\n"
-    "RULE 1 (HIGHEST PRIORITY) — PayPal payouts from THC Circle LLC: "
-    "If the image shows ANY PayPal payment sent by 'THC Circle LLC' or 'THC Circle', "
-    "you MUST classify it as is_big_win: true. The dollar amount does NOT matter. "
-    "$1, $100, $400, any amount — it is ALWAYS a big win. Do NOT apply any dollar "
-    "threshold to THC Circle LLC payments. Stop evaluating after this rule matches.\n\n"
-    "RULE 2 — GMV / analytics dashboard screenshots: If the image shows a creator "
-    "dashboard or analytics screen containing a GMV (Gross Merchandise Value) figure, "
-    "classify as is_big_win: true ONLY if the GMV is $20,000 USD or more. "
-    "GMV below $20,000 is NOT a big win.\n\n"
-    "RULE 3 — All other payout/earnings screenshots: Classify as is_big_win: true "
-    "only if the dollar amount shown is greater than ${threshold} USD.\n\n"
+    "Apply this single rule:\n\n"
+    "PayPal payouts from THC Circle LLC: If the image shows ANY PayPal payment "
+    "sent by 'THC Circle LLC' or 'THC Circle', classify it as is_big_win: true. "
+    "The dollar amount does NOT matter. $1, $100, $400, any amount — it is a big "
+    "win. Everything else is NOT a big win.\n\n"
     "If the image is irrelevant or unclear, classify it as not a big win. "
     "Respond with strict JSON only, no markdown formatting, no code fences, in "
-    "exactly this shape: {{\"is_big_win\": true or false, \"reasoning\": \"short "
-    "explanation of which rule applied and what you saw\"}}"
-).format(threshold=BIG_WIN_THRESHOLD_USD)
+    "exactly this shape: {\"is_big_win\": true or false, \"reasoning\": \"short "
+    "explanation of what you saw\"}"
+)
 
 
 class WinsAICog(commands.Cog):
@@ -181,29 +174,11 @@ class WinsAICog(commands.Cog):
             )
             return
 
-        embed = discord.Embed(
-            title="🔥 Big Win!",
-            description=caption if caption else None,
-            color=discord.Color.gold(),
-            url=message.jump_url,
-        )
-        embed.set_author(
-            name=message.author.display_name,
-            icon_url=message.author.display_avatar.url,
-        )
-        embed.set_image(url=images[0].url)
-        embed.add_field(name="Original message", value=f"[Jump to message]({message.jump_url})")
-
         try:
-            await big_wins_channel.send(embed=embed)
-            if len(images) > 1:
-                for attachment in images[1:]:
-                    extra_embed = discord.Embed(color=discord.Color.gold())
-                    extra_embed.set_image(url=attachment.url)
-                    await big_wins_channel.send(embed=extra_embed)
+            await message.forward(big_wins_channel)
         except Exception:
             logger.exception(
-                "Failed to post big win embed for message %d in big wins channel.",
+                "Failed to forward big win message %d to big wins channel.",
                 message.id,
             )
 
